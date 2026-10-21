@@ -73,7 +73,7 @@
             <form id="loginForm" onsubmit="handleLogin(event)" class="space-y-4">
                 <div>
                     <label class="block text-xs font-semibold text-slate-300 uppercase mb-1">Nick / Usuário</label>
-                    <input type="text" id="loginNick" required placeholder="Ex: Olipe" class="w-full bg-slate-950 border border-rpgborder rounded-xl px-4 py-3 text-sm text-slate-200 focus:outline-none focus:border-purple-500">
+                    <input type="text" id="loginNick" required placeholder="Ex: Yonder" class="w-full bg-slate-950 border border-rpgborder rounded-xl px-4 py-3 text-sm text-slate-200 focus:outline-none focus:border-purple-500">
                 </div>
                 <div>
                     <label class="block text-xs font-semibold text-slate-300 uppercase mb-1">Senha</label>
@@ -236,7 +236,6 @@
         let currentUser = null;
         let cards = [];
 
-        // Mapeamento de Emojis Oficiais
         const emojiMap = {
             classes: { 'Plebeu': '👨🏻‍🌾', 'Nobre': '🤵🏻', 'Realeza': '🤴🏻' },
             kingdoms: { 'Reino Clover': '🕌', 'Reino Diamond': '🕍', 'Reino Spade': '🏰' },
@@ -254,7 +253,7 @@
             squads: {
                 'Alvorecer Dourado': '☀️', 'Touros Negros': '🐃', 'Águias de Prata': '🦅',
                 'Reis Leões Carmesins': '🦁', 'Rosa Azul': '🌹', 'Louva-a-Deus Verdes': '🦗',
-                'Pavões Corais': '🦚', 'Orcas Púrpuras': '🫍', 'Cervo Ciano': '💠', 'Serpente Branca': '🐍', 'NENHUM': '❌'
+                'Pavões Corais': '🦚', 'Orcas Púrpuras': '🫍', 'Cervo Ciano': '💠', 'Serpente Branca': '🐍', 'Nenhum': '❌', 'NENHUM': '❌'
             }
         };
 
@@ -309,31 +308,35 @@
 
             if (!nickInput || !passInput) return;
 
-            const nick = nickInput.value.trim();
+            const inputNick = nickInput.value.trim().toLowerCase();
             const pass = passInput.value;
 
             errEl.classList.add('hidden');
 
             try {
-                const { data, error } = await supabaseClient
-                    .from('profiles')
-                    .select('*')
-                    .eq('nick', nick)
-                    .single();
+                const { data, error } = await supabaseClient.from('profiles').select('*');
 
                 if (error || !data) {
+                    errEl.textContent = "Erro ao conectar com o banco de dados.";
+                    errEl.classList.remove('hidden');
+                    return;
+                }
+
+                const user = data.find(p => p.nick.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "") === inputNick.normalize("NFD").replace(/[\u0300-\u036f]/g, ""));
+
+                if (!user) {
                     errEl.textContent = "Usuário não encontrado.";
                     errEl.classList.remove('hidden');
                     return;
                 }
 
-                if (data.password !== pass) {
+                if (user.password !== pass) {
                     errEl.textContent = "Senha incorreta.";
                     errEl.classList.remove('hidden');
                     return;
                 }
 
-                currentUser = data;
+                currentUser = user;
                 document.getElementById('menuUserNick').textContent = currentUser.nick;
                 
                 if (currentUser.first_access) {
@@ -369,12 +372,17 @@
             }
         }
 
-        function renderProfile() {
+        // Atualiza a ficha puxando sempre os dados mais recentes do Supabase
+        async function renderProfile() {
+            if(!currentUser) return;
+            const { data } = await supabaseClient.from('profiles').select('*').eq('id', currentUser.id).single();
+            if(data) currentUser = data;
+
             const cls = currentUser.social_class || 'Plebeu';
             const kng = currentUser.kingdom || 'Reino Clover';
             const hse = currentUser.house || 'Casa Silva';
             const rnk = currentUser.rank || 'Júnior';
-            const sqd = currentUser.squad || 'Touros Negros';
+            const sqd = currentUser.squad || 'Nenhum';
 
             document.getElementById('profNick').textContent = currentUser.nick;
             document.getElementById('profClass').textContent = `${cls} ${getEmoji('classes', cls)}`;
