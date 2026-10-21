@@ -1,0 +1,13 @@
+body { font-family: 'Inter', sans-serif; }
+
+.landing-bg {
+    background-image: url('l7utbg.webp'); /* Substitua pelo nome exato do arquivo da imagem que colocou na pasta */
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+}
+
+::-webkit-scrollbar { width: 8px; }
+::-webkit-scrollbar-track { background: #050505; }
+::-webkit-scrollbar-thumb { background: #262626; border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: #525252; }
