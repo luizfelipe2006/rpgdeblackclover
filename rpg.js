@@ -1,4 +1,7 @@
-let currentUser = null;
+var currentUser = null;
+var cards = [];
+var currentCategoryFilter = 'TODAS';
+
 let cards = [];
 let currentCategoryFilter = 'TODAS';
 
