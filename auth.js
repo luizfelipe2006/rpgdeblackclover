@@ -20,6 +20,7 @@ async function handleLogin(e) {
     if (errEl) errEl.classList.add('hidden');
 
     try {
+        // Busca os usuários no banco de dados do Supabase
         const { data, error } = await window.supabaseClient.from('profiles').select('*');
 
         if (error) throw error;
@@ -45,23 +46,18 @@ async function handleLogin(e) {
 
             currentUser = user;
         } else {
-            currentUser = {
-                id: 'local-id-' + Date.now(),
-                nick: inputNick,
-                social_class: 'Plebeu',
-                kingdom: 'Reino Clover',
-                house: 'Casa Silva',
-                rank: 'Júnior',
-                squad: 'Touros Negros',
-                hp: 200,
-                mana: 400,
-                first_access: false
-            };
+            if (errEl) {
+                errEl.textContent = "Nenhum usuário cadastrado no banco.";
+                errEl.classList.remove('hidden');
+            }
+            return;
         }
 
         document.getElementById('menuUserNick').textContent = currentUser.nick;
         
-        if (currentUser.first_access) {
+        // VERIFICAÇÃO DE PRIMEIRO ACESSO:
+        // Se first_access for true, obriga a mudar a senha. Se for false, entra direto no painel!
+        if (currentUser.first_access === true) {
             showView('viewNewPassword');
         } else {
             showView('viewDashboard');
@@ -69,24 +65,11 @@ async function handleLogin(e) {
         }
 
     } catch (err) {
-        console.warn("Aviso de rede. Entrando em modo local:", err);
-        
-        currentUser = {
-            id: 'teste-local-id',
-            nick: inputNick,
-            social_class: 'Plebeu',
-            kingdom: 'Reino Clover',
-            house: 'Casa Silva',
-            rank: 'Júnior',
-            squad: 'Touros Negros',
-            hp: 200,
-            mana: 400,
-            first_access: false
-        };
-
-        document.getElementById('menuUserNick').textContent = currentUser.nick;
-        showView('viewDashboard');
-        switchTab('welcome');
+        console.error("Erro na conexão com o servidor:", err);
+        if (errEl) {
+            errEl.textContent = "Erro de conexão com o servidor.";
+            errEl.classList.remove('hidden');
+        }
     }
 }
 
@@ -98,27 +81,26 @@ async function handleNewPassword(e) {
     
     const newPass = newPassInput.value;
 
-    // Atualiza a senha e desativa o primeiro acesso diretamente no banco de dados Supabase
-    if (currentUser.id && currentUser.id !== 'teste-local-id' && !currentUser.id.toString().startsWith('local-id-')) {
-        const { error } = await window.supabaseClient
-            .from('profiles')
-            .update({ 
-                password: newPass, 
-                first_access: false 
-            })
-            .eq('id', currentUser.id);
+    // Atualiza a nova senha no Supabase e define first_access como false permanentemente
+    const { error } = await window.supabaseClient
+        .from('profiles')
+        .update({ 
+            password: newPass, 
+            first_access: false 
+        })
+        .eq('id', currentUser.id);
 
-        if (error) {
-            console.error("Erro ao atualizar senha no Supabase:", error);
-            showToast('Erro', 'Não foi possível atualizar a senha no banco.');
-            return;
-        }
-        
-        currentUser.password = newPass;
-        currentUser.first_access = false;
+    if (error) {
+        console.error("Erro ao atualizar senha no Supabase:", error);
+        showToast('Erro', 'Não foi possível atualizar a senha no banco.');
+        return;
     }
+    
+    // Atualiza o objeto local para refletir que já não é o primeiro acesso
+    currentUser.password = newPass;
+    currentUser.first_access = false;
 
-    showToast('Sucesso', 'Senha alterada com sucesso!');
+    showToast('Sucesso', 'Senha alterada e salva com sucesso!');
     showView('viewDashboard');
     switchTab('welcome');
 }
