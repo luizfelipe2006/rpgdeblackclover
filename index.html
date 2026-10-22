@@ -21,12 +21,11 @@
     <!-- BACKGROUND IMAGE OVERLAY -->
     <div class="fixed inset-0 z-0 opacity-20 pointer-events-none bg-cover bg-center" style="background-image: url('inicio.webp');"></div>
 
-    <!-- MAIN CONTAINER -->
-    <main class="relative z-10 flex-1 flex flex-col items-center justify-center p-4">
+    <!-- MAIN CONTAINER (Expandido para Tela Cheia) -->
+    <main class="relative z-10 flex-1 flex flex-col w-full p-4 sm:p-6">
 
-        <!-- 1. LANDING VIEW -->
-        <div id="viewLanding" class="flex flex-col items-center text-center max-w-xl mx-auto py-12">
-            <!-- Nova Logo Circular -->
+        <!-- 1. LANDING VIEW (Centralizada apenas na entrada) -->
+        <div id="viewLanding" class="flex-1 flex flex-col items-center justify-center text-center max-w-xl mx-auto py-12">
             <div class="flex flex-col items-center justify-center mb-6">
                 <img src="logo.png" alt="Logo Black Clover RPG" class="w-20 h-20 rounded-full object-cover shadow-2xl border-2 border-red-600/50 mb-3">
                 <span class="text-xs tracking-widest text-zinc-400 uppercase font-semibold">SISTEMA OFICIAL</span>
@@ -38,45 +37,49 @@
             </button>
         </div>
 
-        <!-- 2. LOGIN VIEW -->
-        <div id="viewLogin" class="hidden w-full max-w-md mx-auto bg-[#121212] border border-[#262626] rounded-3xl p-8 shadow-2xl">
-            <div class="flex justify-between items-center mb-6">
-                <h2 class="text-xl font-bold text-white flex items-center gap-2"><i class="fa-shield-halved text-red-600"></i> Acesso</h2>
-                <button onclick="showLandingView()" class="text-xs text-zinc-400 hover:text-white cursor-pointer">Voltar</button>
+        <!-- 2. LOGIN VIEW (Centralizada) -->
+        <div id="viewLogin" class="hidden flex-1 flex flex-col items-center justify-center w-full max-w-md mx-auto my-auto">
+            <div class="w-full bg-[#13111c] border border-purple-900/40 rounded-3xl p-8 shadow-2xl backdrop-blur-md">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-xl font-bold text-white flex items-center gap-2"><i class="fa-shield-halved text-red-600"></i> Acesso</h2>
+                    <button onclick="showLandingView()" class="text-xs text-zinc-400 hover:text-white cursor-pointer">Voltar</button>
+                </div>
+                
+                <form onsubmit="handleLogin(event)" class="space-y-4">
+                    <div>
+                        <label class="block text-xs font-semibold text-zinc-400 uppercase mb-2">Nick / Usuário</label>
+                        <input type="text" id="loginNick" required class="w-full bg-black border border-purple-900/30 rounded-xl px-4 py-3 text-white text-sm focus:outline-none focus:border-red-600 transition-colors" placeholder="Digite seu nick...">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-zinc-400 uppercase mb-2">Senha</label>
+                        <input type="password" id="loginPassword" required class="w-full bg-black border border-purple-900/30 rounded-xl px-4 py-3 text-white text-sm focus:outline-none focus:border-red-600 transition-colors" placeholder="••••••••">
+                    </div>
+                    <div id="loginError" class="hidden bg-red-950/50 border border-red-800 text-red-300 text-xs p-3 rounded-xl"></div>
+                    <button type="submit" class="w-full bg-red-600 hover:bg-red-700 text-white font-medium py-3.5 rounded-xl text-sm cursor-pointer transition-all shadow-lg flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-arrow-right-to-bracket"></i> Entrar
+                    </button>
+                </form>
             </div>
-            
-            <form onsubmit="handleLogin(event)" class="space-y-4">
-                <div>
-                    <label class="block text-xs font-semibold text-zinc-400 uppercase mb-2">Nick / Usuário</label>
-                    <input type="text" id="loginNick" required class="w-full bg-black border border-zinc-800 rounded-xl px-4 py-3 text-white text-sm focus:outline-none focus:border-red-600 transition-colors" placeholder="Digite seu nick...">
-                </div>
-                <div>
-                    <label class="block text-xs font-semibold text-zinc-400 uppercase mb-2">Senha</label>
-                    <input type="password" id="loginPassword" required class="w-full bg-black border border-zinc-800 rounded-xl px-4 py-3 text-white text-sm focus:outline-none focus:border-red-600 transition-colors" placeholder="••••••••">
-                </div>
-                <div id="loginError" class="hidden bg-red-950/50 border border-red-800 text-red-300 text-xs p-3 rounded-xl"></div>
-                <button type="submit" class="w-full bg-red-600 hover:bg-red-700 text-white font-medium py-3.5 rounded-xl text-sm cursor-pointer transition-all shadow-lg flex items-center justify-center gap-2">
-                    <i class="fa-solid fa-arrow-right-to-bracket"></i> Entrar
-                </button>
-            </form>
         </div>
 
-        <!-- 3. NEW PASSWORD VIEW (PRIMEIRO ACESSO) -->
-        <div id="viewNewPassword" class="hidden w-full max-w-md mx-auto bg-[#121212] border border-[#262626] rounded-3xl p-8 shadow-2xl">
-            <h2 class="text-xl font-bold text-white mb-2">Definir Nova Senha</h2>
-            <p class="text-xs text-zinc-400 mb-6">Como este é o seu primeiro acesso, cadastre uma nova senha definitiva.</p>
-            <form onsubmit="handleNewPassword(event)" class="space-y-4">
-                <div>
-                    <label class="block text-xs font-semibold text-zinc-400 uppercase mb-2">Nova Senha</label>
-                    <input type="password" id="newPassInput" oninput="validatePasswordStrength(this.value)" required class="w-full bg-black border border-zinc-800 rounded-xl px-4 py-3 text-white text-sm focus:outline-none focus:border-red-600 transition-colors" placeholder="••••••••">
-                </div>
-                <button type="submit" id="btnSavePassword" class="w-full bg-red-600 hover:bg-red-700 text-white font-medium py-3.5 rounded-xl text-sm cursor-pointer transition-all">Salvar Nova Senha</button>
-            </form>
+        <!-- 3. NEW PASSWORD VIEW (PRIMEIRO ACESSO - Centralizada) -->
+        <div id="viewNewPassword" class="hidden flex-1 flex flex-col items-center justify-center w-full max-w-md mx-auto my-auto">
+            <div class="w-full bg-[#13111c] border border-purple-900/40 rounded-3xl p-8 shadow-2xl backdrop-blur-md">
+                <h2 class="text-xl font-bold text-white mb-2">Definir Nova Senha</h2>
+                <p class="text-xs text-zinc-400 mb-6">Como este é o seu primeiro acesso, cadastre uma nova senha definitiva.</p>
+                <form onsubmit="handleNewPassword(event)" class="space-y-4">
+                    <div>
+                        <label class="block text-xs font-semibold text-zinc-400 uppercase mb-2">Nova Senha</label>
+                        <input type="password" id="newPassInput" oninput="validatePasswordStrength(this.value)" required class="w-full bg-black border border-purple-900/30 rounded-xl px-4 py-3 text-white text-sm focus:outline-none focus:border-red-600 transition-colors" placeholder="••••••••">
+                    </div>
+                    <button type="submit" id="btnSavePassword" class="w-full bg-red-600 hover:bg-red-700 text-white font-medium py-3.5 rounded-xl text-sm cursor-pointer transition-all">Salvar Nova Senha</button>
+                </form>
+            </div>
         </div>
 
-        <!-- 4. DASHBOARD VIEW (LAYOUT EM TELA CHEIA E TONS ROXOS/INDIGO) -->
-        <div id="viewDashboard" class="hidden w-full px-4 sm:px-8 py-6">
-            <!-- Navbar Superior em Tela Cheia com Toque Roxo -->
+        <!-- 4. DASHBOARD VIEW (TOTALMENTE EM TELA CHEIA) -->
+        <div id="viewDashboard" class="hidden w-full flex-1 flex flex-col">
+            <!-- Navbar Superior de Ponta a Ponta com Tom Roxo -->
             <header class="w-full bg-[#13111c] border border-purple-900/30 rounded-2xl p-4 mb-6 flex justify-between items-center shadow-2xl relative">
                 <div class="flex items-center gap-3">
                     <div class="w-10 h-10 rounded-xl bg-purple-950/80 border border-purple-800/60 flex items-center justify-center text-purple-400 font-bold shadow-inner">
@@ -127,7 +130,7 @@
                 </div>
             </header>
 
-            <!-- CONTEÚDO DAS TABS EM TELA CHEIA -->
+            <!-- CONTEÚDO DAS TABS EM LARGURA TOTAL -->
             <div id="tabWelcome" class="w-full bg-[#13111c]/90 border border-purple-900/30 rounded-3xl p-8 shadow-2xl backdrop-blur-md">
                 <h2 class="text-2xl font-bold text-white mb-2">Bem-vindo ao Grimório, Mago!</h2>
                 <p class="text-zinc-400 text-sm">Gerencie suas magias, consulte os reinos e acompanhe sua evolução no universo de Black Clover.</p>
