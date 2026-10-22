@@ -1,5 +1,6 @@
 let currentUser = null;
 let cards = [];
+let currentCategoryFilter = 'TODAS';
 
 const emojiMap = {
     classes: { 'Plebeu': '👨🏻‍🌾', 'Nobre': '🤵🏻', 'Realeza': '🤴🏻' },
@@ -38,16 +39,26 @@ function getEmoji(category, val) {
 }
 
 function showView(viewId) {
-    ['viewLanding', 'viewLogin', 'viewNewPassword', 'viewDashboard'].forEach(id => document.getElementById(id).classList.add('hidden'));
-    document.getElementById(viewId).classList.remove('hidden');
+    ['viewLanding', 'viewLogin', 'viewNewPassword', 'viewDashboard'].forEach(id => {
+        const el = document.getElementById(id);
+        if(el) el.classList.add('hidden');
+    });
+    const target = document.getElementById(viewId);
+    if(target) target.classList.remove('hidden');
 }
 
 function showLandingView() { showView('viewLanding'); }
 function showLoginView() { showView('viewLogin'); }
-function toggleMenu() { document.getElementById('dropdownMenu').classList.toggle('hidden'); }
+function toggleMenu() { 
+    const menu = document.getElementById('dropdownMenu');
+    if(menu) menu.classList.toggle('hidden'); 
+}
 
 function switchTab(tabName) {
-    ['tabWelcome', 'tabProfile', 'tabRealms', 'tabCards', 'tabNotices', 'tabTournaments', 'tabSchedule'].forEach(id => document.getElementById(id).classList.add('hidden'));
+    ['tabWelcome', 'tabProfile', 'tabRealms', 'tabCards', 'tabNotices', 'tabTournaments', 'tabSchedule'].forEach(id => {
+        const el = document.getElementById(id);
+        if(el) el.classList.add('hidden');
+    });
     
     let targetTab = 'tabWelcome';
     if(tabName === 'profile') targetTab = 'tabProfile';
@@ -57,8 +68,11 @@ function switchTab(tabName) {
     if(tabName === 'torneios') targetTab = 'tabTournaments';
     if(tabName === 'schedule') targetTab = 'tabSchedule';
 
-    document.getElementById(targetTab).classList.remove('hidden');
-    document.getElementById('dropdownMenu').classList.add('hidden');
+    const tabEl = document.getElementById(targetTab);
+    if(tabEl) tabEl.classList.remove('hidden');
+
+    const menu = document.getElementById('dropdownMenu');
+    if(menu) menu.classList.add('hidden');
 
     if(tabName === 'cards') loadCards();
     if(tabName === 'realms') loadRealmsPlayers();
@@ -68,8 +82,12 @@ function switchTab(tabName) {
 
 async function renderProfile() {
     if(!currentUser) return;
-    const { data } = await window.supabaseClient.from('profiles').select('*').eq('id', currentUser.id).single();
-    if(data) currentUser = data;
+    try {
+        const { data } = await window.supabaseClient.from('profiles').select('*').eq('id', currentUser.id).single();
+        if(data) currentUser = data;
+    } catch(err) {
+        console.warn("Erro ao recarregar perfil:", err);
+    }
 
     const cls = currentUser.social_class || 'Plebeu';
     const kng = currentUser.kingdom || 'Reino Clover';
@@ -77,153 +95,257 @@ async function renderProfile() {
     const rnk = currentUser.rank || 'Júnior';
     const sqd = currentUser.squad || 'Nenhum';
 
-    document.getElementById('profNick').textContent = currentUser.nick;
-    document.getElementById('profClass').textContent = `${cls} ${getEmoji('classes', cls)}`;
-    document.getElementById('profKingdom').textContent = `${kng} ${getEmoji('kingdoms', kng)}`;
-    document.getElementById('profHouse').textContent = `${hse} ${getEmoji('houses', hse)}`;
-    document.getElementById('profRank').textContent = `${rnk} ${getEmoji('ranks', rnk)}`;
-    document.getElementById('profSquad').textContent = `${sqd} ${getEmoji('squads', sqd)}`;
-    document.getElementById('profHp').textContent = (currentUser.hp || 200) + ' ❣️';
-    document.getElementById('profMana').textContent = (currentUser.mana || 400) + ' ♦️';
+    const pNick = document.getElementById('profNick');
+    if(pNick) pNick.textContent = currentUser.nick;
+
+    const pClass = document.getElementById('profClass');
+    if(pClass) pClass.textContent = `${cls} ${getEmoji('classes', cls)}`;
+
+    const pKingdom = document.getElementById('profKingdom');
+    if(pKingdom) pKingdom.textContent = `${kng} ${getEmoji('kingdoms', kng)}`;
+
+    const pHouse = document.getElementById('profHouse');
+    if(pHouse) pHouse.textContent = `${hse} ${getEmoji('houses', hse)}`;
+
+    const pRank = document.getElementById('profRank');
+    if(pRank) pRank.textContent = `${rnk} ${getEmoji('ranks', rnk)}`;
+
+    const pSquad = document.getElementById('profSquad');
+    if(pSquad) pSquad.textContent = `${sqd} ${getEmoji('squads', sqd)}`;
+
+    const pHp = document.getElementById('profHp');
+    if(pHp) pHp.textContent = (currentUser.hp || 200) + ' ❣️';
+
+    const pMana = document.getElementById('profMana');
+    if(pMana) pMana.textContent = (currentUser.mana || 400) + ' ♦️';
 }
 
 async function loadRealmsPlayers() {
-    const { data } = await window.supabaseClient.from('profiles').select('nick, kingdom, squad, rank, social_class, house');
-    if(!data) return;
+    try {
+        const { data } = await window.supabaseClient.from('profiles').select('nick, kingdom, squad, rank, social_class, house');
+        if(!data) return;
 
-    let cloverHtml = '', diamondHtml = '', spadeHtml = '';
-    data.forEach(p => {
-        const cEmoji = getEmoji('classes', p.social_class);
-        const hEmoji = getEmoji('houses', p.house);
-        const rEmoji = getEmoji('ranks', p.rank);
-        const sEmoji = getEmoji('squads', p.squad);
+        let cloverHtml = '', diamondHtml = '', spadeHtml = '';
+        data.forEach(p => {
+            const cEmoji = getEmoji('classes', p.social_class);
+            const hEmoji = getEmoji('houses', p.house);
+            const rEmoji = getEmoji('ranks', p.rank);
+            const sEmoji = getEmoji('squads', p.squad);
 
-        const item = `
-            <div class="bg-black/60 p-3 rounded-xl border border-zinc-800 mb-2.5 flex items-center justify-between hover:border-zinc-700 transition-colors">
-                <span class="font-bold text-white">${p.nick}</span>
-                <div class="text-sm space-x-1">
-                    <span>${cEmoji}</span>
-                    <span>${hEmoji}</span>
-                    <span>${rEmoji}</span>
-                    <span>${sEmoji}</span>
-                </div>
-            </div>`;
-        
-        if(p.kingdom === 'Reino Diamond') diamondHtml += item;
-        else if(p.kingdom === 'Reino Spade') spadeHtml += item;
-        else cloverHtml += item;
-    });
+            const item = `
+                <div class="bg-black/60 p-3 rounded-xl border border-zinc-800 mb-2.5 flex items-center justify-between hover:border-zinc-700 transition-colors">
+                    <span class="font-bold text-white text-sm">${p.nick}</span>
+                    <div class="text-sm space-x-1">
+                        <span>${cEmoji}</span>
+                        <span>${hEmoji}</span>
+                        <span>${rEmoji}</span>
+                        <span>${sEmoji}</span>
+                    </div>
+                </div>`;
+            
+            if(p.kingdom === 'Reino Diamond') diamondHtml += item;
+            else if(p.kingdom === 'Reino Spade') spadeHtml += item;
+            else cloverHtml += item;
+        });
 
-    document.getElementById('listClover').innerHTML = cloverHtml || '<span class="text-zinc-500 text-xs">Nenhum mago registrado</span>';
-    document.getElementById('listDiamond').innerHTML = diamondHtml || '<span class="text-zinc-500 text-xs">Nenhum mago registrado</span>';
-    document.getElementById('listSpade').innerHTML = spadeHtml || '<span class="text-zinc-500 text-xs">Nenhum mago registrado</span>';
+        const lClover = document.getElementById('listClover');
+        if(lClover) lClover.innerHTML = cloverHtml || '<span class="text-zinc-500 text-xs">Nenhum mago registrado</span>';
+
+        const lDiamond = document.getElementById('listDiamond');
+        if(lDiamond) lDiamond.innerHTML = diamondHtml || '<span class="text-zinc-500 text-xs">Nenhum mago registrado</span>';
+
+        const lSpade = document.getElementById('listSpade');
+        if(lSpade) lSpade.innerHTML = spadeHtml || '<span class="text-zinc-500 text-xs">Nenhum mago registrado</span>';
+    } catch(err) {
+        console.error("Erro ao carregar reinos:", err);
+    }
 }
 
 async function loadCards() {
     if (!currentUser) return;
-    const { data } = await window.supabaseClient.from('cards').select('*').eq('user_id', currentUser.id);
-    cards = data || [];
-    renderCards(cards);
+    try {
+        const { data } = await window.supabaseClient.from('cards').select('*').eq('user_id', currentUser.id);
+        cards = data || [];
+        filterCards();
+    } catch(err) {
+        console.error("Erro ao carregar cards:", err);
+    }
+}
+
+function setCategoryFilter(cat) {
+    currentCategoryFilter = cat;
+    
+    // Atualiza o estilo visual das pílulas
+    document.querySelectorAll('.pill-btn').forEach(btn => {
+        btn.className = "pill-btn bg-zinc-900 hover:bg-zinc-800 text-zinc-300 px-4 py-2 rounded-full text-xs font-semibold whitespace-nowrap transition-all border border-zinc-800";
+    });
+
+    const activeBtn = document.getElementById(`pill-${cat}`);
+    if(activeBtn) {
+        activeBtn.className = "pill-btn bg-red-600 text-white px-4 py-2 rounded-full text-xs font-semibold whitespace-nowrap transition-all border border-red-500 shadow-md";
+    }
+
+    filterCards();
+}
+
+function filterCards() {
+    const qInput = document.getElementById('searchInput');
+    const query = qInput ? qInput.value.toLowerCase() : '';
+
+    const filtered = cards.filter(c => {
+        const matchesCategory = (currentCategoryFilter === 'TODAS') || 
+                                (c.name && c.name.toUpperCase() === currentCategoryFilter.toUpperCase());
+        const matchesSearch = !query || 
+                              (c.name && c.name.toLowerCase().includes(query)) || 
+                              (c.text && c.text.toLowerCase().includes(query));
+
+        return matchesCategory && matchesSearch;
+    });
+
+    renderCards(filtered);
 }
 
 function renderCards(list) {
     const grid = document.getElementById('cardsGrid');
     if(!grid) return;
-    grid.innerHTML = list.length === 0 ? '<p class="text-zinc-500 text-sm col-span-full">Nenhum card cadastrado no grimório.</p>' : '';
+
+    if(list.length === 0) {
+        grid.innerHTML = '<p class="text-zinc-500 text-sm col-span-full py-8 text-center">Nenhum card encontrado nesta categoria.</p>';
+        return;
+    }
+
+    grid.innerHTML = '';
     list.forEach(c => {
         grid.innerHTML += `
-            <div class="bg-[#121212] border border-[#262626] rounded-3xl p-6 flex flex-col justify-between shadow-2xl hover:border-zinc-600 transition-all">
+            <div class="bg-[#121212] border border-zinc-800 rounded-3xl p-5 flex flex-col justify-between shadow-2xl hover:border-zinc-600 transition-all">
                 <div>
-                    <h3 class="font-bold text-white text-base mb-3 flex items-center justify-between">${c.name}</h3>
-                    <div class="flex gap-2 mb-4">
-                        <span class="bg-zinc-800 text-zinc-300 text-xs px-2.5 py-1 rounded-xl border border-zinc-700 font-medium">💥 Dano: ${c.damage}</span>
-                        <span class="bg-zinc-800 text-zinc-300 text-xs px-2.5 py-1 rounded-xl border border-zinc-700 font-medium">💧 Mana: ${c.mana_cost}</span>
+                    <div class="flex justify-between items-center mb-4">
+                        <span class="bg-zinc-800 text-white text-[11px] px-3 py-1 rounded-lg border border-zinc-700 font-bold uppercase tracking-widest">${c.name || 'GERAL'}</span>
+                        <button onclick="deleteCard('${c.id}')" class="text-zinc-600 hover:text-red-500 transition-colors cursor-pointer p-1" title="Excluir Card"><i class="fa-solid fa-trash"></i></button>
                     </div>
-                    <div class="bg-black p-4 rounded-2xl text-xs font-mono text-zinc-300 whitespace-pre-wrap border border-[#262626] leading-relaxed">${c.text}</div>
+                    <div class="bg-black p-4 rounded-xl text-xs font-mono text-zinc-300 whitespace-pre-wrap border border-zinc-800 leading-relaxed max-h-60 overflow-y-auto">${c.text}</div>
                 </div>
-                <div class="flex gap-2.5 pt-4 border-t border-[#262626] mt-5">
-                    <button onclick="navigator.clipboard.writeText('${c.text.replace(/'/g, "\\'")}'); showToast('Copiado', '${c.name}');" class="flex-1 bg-zinc-800 hover:bg-zinc-700 text-white py-2.5 rounded-xl text-xs font-semibold cursor-pointer transition-all border border-zinc-700">Copiar Card</button>
-                    <button onclick="deleteCard('${c.id}')" class="bg-zinc-900 hover:bg-zinc-800 text-zinc-400 px-3.5 py-2.5 rounded-xl text-xs cursor-pointer transition-all border border-[#262626]"><i class="fa-solid fa-trash"></i></button>
+                <div class="pt-4 mt-4 border-t border-zinc-800">
+                    <button onclick="copyCardText('${c.id}')" class="w-full bg-zinc-200 hover:bg-white text-black py-3 rounded-xl text-xs font-bold cursor-pointer transition-all flex items-center justify-center gap-2 shadow-md">
+                        <i class="fa-regular fa-copy"></i> Copiar seu Card
+                    </button>
                 </div>
             </div>`;
     });
 }
 
-function openCardModal() { document.getElementById('cardModal').classList.remove('hidden'); document.getElementById('cardModal').classList.add('flex'); }
-function closeCardModal() { document.getElementById('cardModal').classList.remove('flex'); document.getElementById('cardModal').classList.add('hidden'); }
+function copyCardText(id) {
+    const card = cards.find(c => c.id === id);
+    if (card) {
+        navigator.clipboard.writeText(card.text);
+        showToast('Copiado!', 'Card copiado para a área de transferência.');
+    }
+}
+
+function openCardModal() { 
+    const modal = document.getElementById('cardModal');
+    if(modal) {
+        modal.classList.remove('hidden'); 
+        modal.classList.add('flex'); 
+    }
+}
+
+function closeCardModal() { 
+    const modal = document.getElementById('cardModal');
+    if(modal) {
+        modal.classList.remove('flex'); 
+        modal.classList.add('hidden'); 
+    }
+}
 
 async function saveCardData(e) {
     e.preventDefault();
     if(!currentUser) return;
 
-    const { error } = await window.supabaseClient.from('cards').insert([{
-        user_id: currentUser.id,
-        name: document.getElementById('cardNameInput').value,
-        damage: document.getElementById('cardDamageInput').value,
-        mana_cost: document.getElementById('cardManaInput').value,
-        usage_limit: 'Infinity',
-        text: document.getElementById('cardTextInput').value
-    }]);
+    const typeInput = document.getElementById('cardTypeInput');
+    const textInput = document.getElementById('cardTextInput');
 
-    if(!error) {
-        closeCardModal();
-        document.getElementById('cardNameInput').value = '';
-        document.getElementById('cardDamageInput').value = '';
-        document.getElementById('cardManaInput').value = '';
-        document.getElementById('cardTextInput').value = '';
-        loadCards();
-        showToast('Salvo', 'Card criado com sucesso.');
-    } else {
-        showToast('Erro', 'Não foi possível salvar o card.');
+    if(!typeInput || !textInput) return;
+
+    const typeValue = typeInput.value;
+    const textValue = textInput.value;
+
+    try {
+        const { error } = await window.supabaseClient.from('cards').insert([{
+            user_id: currentUser.id,
+            name: typeValue,
+            damage: '-',
+            mana_cost: '-',
+            usage_limit: '-',
+            text: textValue
+        }]);
+
+        if(!error) {
+            closeCardModal();
+            typeInput.value = '';
+            textInput.value = '';
+            loadCards();
+            showToast('Salvo', 'Card registrado no grimório.');
+        } else {
+            showToast('Erro', 'Não foi possível salvar o card.');
+        }
+    } catch(err) {
+        console.error("Erro ao salvar card:", err);
+        showToast('Erro', 'Falha na conexão.');
     }
 }
 
 async function deleteCard(id) {
-    await window.supabaseClient.from('cards').delete().eq('id', id);
-    loadCards();
-    showToast('Excluído', 'Card removido.');
+    try {
+        await window.supabaseClient.from('cards').delete().eq('id', id);
+        loadCards();
+        showToast('Excluído', 'Card removido com sucesso.');
+    } catch(err) {
+        console.error("Erro ao deletar card:", err);
+    }
 }
 
 async function loadSchedule() {
-    const { data, error } = await window.supabaseClient
-        .from('schedules')
-        .select('*')
-        .order('created_at', { ascending: false });
+    try {
+        const { data } = await window.supabaseClient.from('schedules').select('*').order('created_at', { ascending: false });
+        const container = document.getElementById('scheduleContainer');
+        if (!container) return;
 
-    const container = document.getElementById('scheduleContainer');
-    if (!container) return;
+        if (!data || data.length === 0) {
+            container.innerHTML = '<p class="text-zinc-500 text-sm">Nenhum cronograma cadastrado para este mês.</p>';
+            return;
+        }
 
-    if (!data || data.length === 0) {
-        container.innerHTML = '<p class="text-zinc-500 text-sm">Nenhum cronograma cadastrado para este mês.</p>';
-        return;
-    }
-
-    let html = '';
-    data.forEach(item => {
-        html += `
-            <div class="bg-black/60 p-4 rounded-2xl border border-zinc-800 mb-3 hover:border-zinc-700 transition-colors">
-                <div class="flex justify-between items-center mb-1">
-                    <span class="text-xs font-bold text-red-500 uppercase tracking-wider">${item.month_year}</span>
-                    <span class="bg-zinc-800 text-zinc-300 text-xs px-2.5 py-0.5 rounded-full border border-zinc-700 font-mono">📅 ${item.event_date}</span>
+        let html = '';
+        data.forEach(item => {
+            html += `
+                <div class="bg-black/60 p-4 rounded-2xl border border-zinc-800 mb-3 hover:border-zinc-700 transition-colors">
+                    <div class="flex justify-between items-center mb-1">
+                        <span class="text-xs font-bold text-red-500 uppercase tracking-wider">${item.month_year}</span>
+                        <span class="bg-zinc-800 text-zinc-300 text-xs px-2.5 py-0.5 rounded-full border border-zinc-700 font-mono">📅 ${item.event_date}</span>
+                    </div>
+                    <h3 class="font-bold text-white text-base mb-1">${item.title}</h3>
+                    <p class="text-zinc-400 text-xs leading-relaxed">${item.description || ''}</p>
                 </div>
-                <h3 class="font-bold text-white text-base mb-1">${item.title}</h3>
-                <p class="text-zinc-400 text-xs leading-relaxed">${item.description || ''}</p>
-            </div>
-        `;
-    });
+            `;
+        });
 
-    container.innerHTML = html;
+        container.innerHTML = html;
+    } catch(err) {
+        console.error("Erro ao carregar cronograma:", err);
+    }
 }
 
 function showToast(title, sub) {
     const t = document.getElementById('toast');
-    document.getElementById('toastTitle').textContent = title;
-    document.getElementById('toastSub').textContent = sub;
-    t.classList.remove('translate-y-20', 'opacity-0');
-    setTimeout(() => t.classList.add('translate-y-20', 'opacity-0'), 3000);
-}
+    const tTitle = document.getElementById('toastTitle');
+    const tSub = document.getElementById('toastSub');
 
-function filterCards() {
-    const q = document.getElementById('searchInput').value.toLowerCase();
-    renderCards(cards.filter(c => c.name.toLowerCase().includes(q)));
+    if(tTitle) tTitle.textContent = title;
+    if(tSub) tSub.textContent = sub;
+
+    if(t) {
+        t.classList.remove('translate-y-20', 'opacity-0');
+        setTimeout(() => t.classList.add('translate-y-20', 'opacity-0'), 3000);
+    }
 }
