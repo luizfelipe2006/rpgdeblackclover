@@ -20,7 +20,6 @@ async function handleLogin(e) {
     if (errEl) errEl.classList.add('hidden');
 
     try {
-        // Busca os usuários no banco de dados do Supabase
         const { data, error } = await window.supabaseClient.from('profiles').select('*');
 
         if (error) throw error;
@@ -55,8 +54,6 @@ async function handleLogin(e) {
 
         document.getElementById('menuUserNick').textContent = currentUser.nick;
         
-        // VERIFICAÇÃO DE PRIMEIRO ACESSO:
-        // Se first_access for true, obriga a mudar a senha. Se for false, entra direto no painel!
         if (currentUser.first_access === true) {
             showView('viewNewPassword');
         } else {
@@ -81,7 +78,6 @@ async function handleNewPassword(e) {
     
     const newPass = newPassInput.value;
 
-    // Atualiza a nova senha no Supabase e define first_access como false permanentemente
     const { error } = await window.supabaseClient
         .from('profiles')
         .update({ 
@@ -96,7 +92,6 @@ async function handleNewPassword(e) {
         return;
     }
     
-    // Atualiza o objeto local para refletir que já não é o primeiro acesso
     currentUser.password = newPass;
     currentUser.first_access = false;
 
