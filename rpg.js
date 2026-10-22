@@ -10,7 +10,7 @@ const emojiMap = {
         'Casa Zogratis': '☠️', 'Casa Grinberryall': '🌟', 'Casa Novachrono': '⏳'
     },
     ranks: {
-        'Júnior': '☪️', 'Intermediário': '⚜️', 'Sênior': '🔱', 'Grão Mago': '⚛️',
+        'Júnior': '☪️', 'Junior': '☪️', 'Intermediário': '⚜️', 'Sênior': '🔱', 'Grão Mago': '⚛️',
         'Sub Comandante': '⚓', 'Tenente Brilhante': '🥈', 'Vice-capitão': '🃏',
         'Comandante Chefe': '🪖', 'Tríade Negra': '🏴‍☠️', 'General Brilhante': '🎖️',
         'Capitão': '⚖️', 'Conselheiro': '🕎', 'Rei Mago': '👑', 'Rei': '🀄', 'Imperador Supremo': '☦️'
@@ -24,8 +24,13 @@ const emojiMap = {
 
 function getEmoji(category, val) {
     if(!val) return '';
+    const cleanVal = val.toString().toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+    
+    if (!emojiMap[category]) return '';
+
     for (let key in emojiMap[category]) {
-        if (val.toLowerCase().includes(key.toLowerCase())) {
+        const cleanKey = key.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+        if (cleanVal.includes(cleanKey)) {
             return emojiMap[category][key];
         }
     }
@@ -43,11 +48,22 @@ function toggleMenu() { document.getElementById('dropdownMenu').classList.toggle
 
 function switchTab(tabName) {
     ['tabWelcome', 'tabProfile', 'tabRealms', 'tabCards', 'tabNotices', 'tabTournaments', 'tabSchedule'].forEach(id => document.getElementById(id).classList.add('hidden'));
-    document.getElementById('tab' + tabName.charAt(0).toUpperCase() + tabName.slice(1)).classList.remove('hidden');
+    
+    let targetTab = 'tabWelcome';
+    if(tabName === 'profile') targetTab = 'tabProfile';
+    if(tabName === 'realms') targetTab = 'tabRealms';
+    if(tabName === 'cards') targetTab = 'tabCards';
+    if(tabName === 'notices') targetTab = 'tabNotices';
+    if(tabName === 'torneios') targetTab = 'tabTournaments';
+    if(tabName === 'schedule') targetTab = 'tabSchedule';
+
+    document.getElementById(targetTab).classList.remove('hidden');
     document.getElementById('dropdownMenu').classList.add('hidden');
+
     if(tabName === 'cards') loadCards();
     if(tabName === 'realms') loadRealmsPlayers();
     if(tabName === 'profile') renderProfile();
+    if(tabName === 'schedule') loadSchedule();
 }
 
 async function renderProfile() {
@@ -83,7 +99,7 @@ async function loadRealmsPlayers() {
         const sEmoji = getEmoji('squads', p.squad);
 
         const item = `
-            <div class="bg-black/60 p-3 rounded-xl border border-rpgborder mb-2.5 flex items-center justify-between hover:border-zinc-600 transition-colors">
+            <div class="bg-black/60 p-3 rounded-xl border border-zinc-800 mb-2.5 flex items-center justify-between hover:border-zinc-700 transition-colors">
                 <span class="font-bold text-white">${p.nick}</span>
                 <div class="text-sm space-x-1">
                     <span>${cEmoji}</span>
@@ -105,7 +121,6 @@ async function loadRealmsPlayers() {
 
 async function loadCards() {
     if (!currentUser) return;
-    // Filtra estritamente apenas os cards pertencentes ao ID do usuário logado
     const { data } = await window.supabaseClient.from('cards').select('*').eq('user_id', currentUser.id);
     cards = data || [];
     renderCards(cards);
@@ -141,7 +156,6 @@ async function saveCardData(e) {
     e.preventDefault();
     if(!currentUser) return;
 
-    // Associa o card rigorosamente ao ID do usuário logado atualmente
     const { error } = await window.supabaseClient.from('cards').insert([{
         user_id: currentUser.id,
         name: document.getElementById('cardNameInput').value,
@@ -168,6 +182,37 @@ async function deleteCard(id) {
     await window.supabaseClient.from('cards').delete().eq('id', id);
     loadCards();
     showToast('Excluído', 'Card removido.');
+}
+
+async function loadSchedule() {
+    const { data, error } = await window.supabaseClient
+        .from('schedules')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+    const container = document.getElementById('scheduleContainer');
+    if (!container) return;
+
+    if (!data || data.length === 0) {
+        container.innerHTML = '<p class="text-zinc-500 text-sm">Nenhum cronograma cadastrado para este mês.</p>';
+        return;
+    }
+
+    let html = '';
+    data.forEach(item => {
+        html += `
+            <div class="bg-black/60 p-4 rounded-2xl border border-zinc-800 mb-3 hover:border-zinc-700 transition-colors">
+                <div class="flex justify-between items-center mb-1">
+                    <span class="text-xs font-bold text-red-500 uppercase tracking-wider">${item.month_year}</span>
+                    <span class="bg-zinc-800 text-zinc-300 text-xs px-2.5 py-0.5 rounded-full border border-zinc-700 font-mono">📅 ${item.event_date}</span>
+                </div>
+                <h3 class="font-bold text-white text-base mb-1">${item.title}</h3>
+                <p class="text-zinc-400 text-xs leading-relaxed">${item.description || ''}</p>
+            </div>
+        `;
+    });
+
+    container.innerHTML = html;
 }
 
 function showToast(title, sub) {
