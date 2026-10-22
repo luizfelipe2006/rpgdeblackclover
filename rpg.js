@@ -2,9 +2,6 @@ var currentUser = null;
 var cards = [];
 var currentCategoryFilter = 'TODAS';
 
-let cards = [];
-let currentCategoryFilter = 'TODAS';
-
 const emojiMap = {
     classes: { 'Plebeu': '👨🏻‍🌾', 'Nobre': '🤵🏻', 'Realeza': '🤴🏻' },
     kingdoms: { 'Reino Clover': '🕌', 'Reino Diamond': '🕍', 'Reino Spade': '🏰' },
