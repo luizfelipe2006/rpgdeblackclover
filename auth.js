@@ -1,15 +1,5 @@
-function validatePasswordStrength(pass) {
-    const btn = document.getElementById('btnSavePassword');
-    if(btn) {
-        btn.disabled = false;
-        btn.className = "w-full bg-zinc-800 hover:bg-zinc-700 text-white font-medium py-3.5 rounded-xl text-sm cursor-pointer transition-all border border-zinc-700";
-    }
-}
-
 async function handleLogin(e) {
     e.preventDefault();
-    console.log("Botão Entrar clicado!");
-
     const nickInput = document.getElementById('loginNick');
     const passInput = document.getElementById('loginPassword');
     const errEl = document.getElementById('loginError');
@@ -22,49 +12,48 @@ async function handleLogin(e) {
     if (errEl) errEl.classList.add('hidden');
 
     try {
-        // Tenta consultar o novo banco de dados do Supabase
         const { data, error } = await window.supabaseClient.from('profiles').select('*');
 
-        if (error) {
-            console.error("Erro do Supabase:", error);
-            throw error;
+        if (error) throw error;
+
+        const user = data.find(p => p.nick.toLowerCase() === inputNick.toLowerCase());
+
+        if (!user) {
+            if (errEl) {
+                errEl.textContent = "Usuário não encontrado.";
+                errEl.classList.remove('hidden');
+            }
+            return;
         }
 
-        if (data && data.length > 0) {
-            const user = data.find(p => p.nick.toLowerCase() === inputNick.toLowerCase());
-
-            if (!user) {
-                if (errEl) {
-                    errEl.textContent = "Usuário não encontrado.";
-                    errEl.classList.remove('hidden');
-                }
-                return;
+        if (user.password !== pass) {
+            if (errEl) {
+                errEl.textContent = "Senha incorreta.";
+                errEl.classList.remove('hidden');
             }
+            return;
+        }
 
-            if (user.password !== pass) {
-                if (errEl) {
-                    errEl.textContent = "Senha incorreta.";
-                    errEl.classList.remove('hidden');
-                }
-                return;
-            }
+        currentUser = user;
+        document.getElementById('menuUserNick').textContent = currentUser.nick;
 
-            currentUser = user;
+        // Se for o primeiro acesso, obriga a alterar a senha
+        if (currentUser.first_access) {
+            showView('viewNewPassword');
         } else {
-            // Fallback caso a tabela esteja vazia mas conectada
-            currentUser = {
-                id: 'novo-id-' + Math.random(),
-                nick: inputNick,
-                social_class: 'Nobre',
-                kingdom: 'Reino Clover',
-                house: 'Casa Silva',
-                rank: 'Grão Mago',
-                squad: 'Touros Negros',
-                hp: 200,
-                mana: 400,
-                first_access: false
-            };
+            showView('viewDashboard');
+            switchTab('welcome');
         }
+
+    } catch (err) {
+        console.warn("Modo de segurança ativado:", err);
+        // Fallback local caso haja falha de rede
+        currentUser = {
+            id: 'teste-local-id',
+            nick: inputNick,
+            password: pass,
+            first_access: (pass === 'Senharpg123')
+        };
 
         document.getElementById('menuUserNick').textContent = currentUser.nick;
         
@@ -74,41 +63,30 @@ async function handleLogin(e) {
             showView('viewDashboard');
             switchTab('welcome');
         }
-
-    } catch (err) {
-        console.warn("Aviso de rede/banco. Entrando em modo de segurança local:", err);
-        
-        // Acesso liberado instantaneamente para garantir que o painel abra sempre
-        currentUser = {
-            id: 'teste-local-id',
-            nick: inputNick,
-            social_class: 'Nobre',
-            kingdom: 'Reino Clover',
-            house: 'Casa Silva',
-            rank: 'Grão Mago',
-            squad: 'Touros Negros',
-            hp: 200,
-            mana: 400,
-            first_access: false
-        };
-
-        document.getElementById('menuUserNick').textContent = currentUser.nick;
-        showView('viewDashboard');
-        switchTab('welcome');
     }
 }
 
 async function handleNewPassword(e) {
     e.preventDefault();
-    const newPass = document.getElementById('newPassInput').value;
+    const newPassInput = document.getElementById('newPassInput');
+    if (!newPassInput) return;
+    
+    const newPass = newPassInput.value;
 
     if (currentUser && currentUser.id !== 'teste-local-id') {
-        await window.supabaseClient.from('profiles').update({ 
+        // Atualiza a nova senha no banco e define first_access como false permanentemente
+        const { error } = await window.supabaseClient.from('profiles').update({ 
             password: newPass, 
             first_access: false 
         }).eq('id', currentUser.id);
+
+        if (error) {
+            showToast('Erro', 'Não foi possível atualizar a senha.');
+            return;
+        }
     }
 
+    currentUser.first_access = false;
     showToast('Sucesso', 'Senha alterada com sucesso!');
     showView('viewDashboard');
     switchTab('welcome');
