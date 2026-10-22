@@ -16,7 +16,7 @@
         body { font-family: 'Inter', sans-serif; background-color: #0b0b0b; color: #e4e4e7; }
     </style>
 </head>
-<body class="min-h-screen bg-black text-zinc-100 flex flex-col justify-between selection:bg-red-600 selection:text-white">
+<body class="min-h-screen bg-[#0b0b0b] text-zinc-100 flex flex-col justify-between selection:bg-red-600 selection:text-white">
 
     <!-- BACKGROUND IMAGE OVERLAY -->
     <div class="fixed inset-0 z-0 opacity-20 pointer-events-none bg-cover bg-center" style="background-image: url('inicio.webp');"></div>
@@ -74,23 +74,60 @@
             </form>
         </div>
 
-        <!-- 4. DASHBOARD VIEW -->
-        <div id="viewDashboard" class="hidden w-full max-w-6xl mx-auto">
-            <!-- Navbar do Painel -->
-            <nav class="bg-[#121212] border border-[#262626] rounded-2xl p-4 mb-6 flex justify-between items-center shadow-xl">
+        <!-- 4. DASHBOARD VIEW (ESTRUTURA ORIGINAL COM DROPDOWN) -->
+        <div id="viewDashboard" class="hidden w-full max-w-6xl mx-auto py-6">
+            <!-- Navbar Superior Original -->
+            <header class="bg-[#121212] border border-[#262626] rounded-2xl p-4 mb-6 flex justify-between items-center shadow-2xl relative">
                 <div class="flex items-center gap-3">
-                    <span class="font-bold text-white text-base tracking-wide">Grimório • <span id="menuUserNick" class="text-red-500">Mago</span></span>
+                    <div class="w-9 h-9 rounded-xl bg-purple-950/60 border border-purple-800/50 flex items-center justify-center text-purple-400 font-bold">
+                        <i class="fa-solid fa-clover"></i>
+                    </div>
+                    <div>
+                        <div class="flex items-center gap-2">
+                            <span class="font-bold text-white text-sm tracking-wide">RPG Black Clover</span>
+                            <span class="bg-purple-950/80 text-purple-300 text-[10px] px-2 py-0.5 rounded-full border border-purple-800">Batalha</span>
+                        </div>
+                        <span class="text-xs text-zinc-400">Painel do Jogador</span>
+                    </div>
                 </div>
-                <div class="flex items-center gap-2 sm:gap-4 text-sm">
-                    <button onclick="switchTab('welcome')" class="hover:text-red-500 cursor-pointer transition-colors px-2 py-1">Início</button>
-                    <button onclick="switchTab('cards')" class="hover:text-red-500 cursor-pointer transition-colors px-2 py-1">Cards</button>
-                    <button onclick="switchTab('realms')" class="hover:text-red-500 cursor-pointer transition-colors px-2 py-1">Reinos</button>
-                    <button onclick="switchTab('profile')" class="hover:text-red-500 cursor-pointer transition-colors px-2 py-1">Perfil</button>
-                    <button onclick="handleLogout()" class="text-red-500 hover:text-red-400 cursor-pointer p-2"><i class="fa-solid fa-power-off"></i></button>
-                </div>
-            </nav>
 
-            <!-- Tabs de Conteúdo -->
+                <!-- Botão do Menu / Três Pontinhos -->
+                <div class="relative">
+                    <button onclick="toggleMenu()" class="w-10 h-10 rounded-xl bg-black border border-zinc-800 hover:border-zinc-700 text-zinc-300 flex items-center justify-center cursor-pointer transition-colors">
+                        <i class="fa-solid fa-ellipsis-vertical"></i>
+                    </button>
+
+                    <!-- Dropdown Menu Original -->
+                    <div id="dropdownMenu" class="hidden absolute right-0 mt-2 w-64 bg-[#121212] border border-zinc-800 rounded-2xl shadow-2xl py-2 z-50">
+                        <div class="px-4 py-2 border-b border-zinc-800/80 mb-1">
+                            <span class="text-[10px] text-zinc-500 uppercase tracking-wider block">Logado como:</span>
+                            <span id="menuUserNick" class="text-sm font-bold text-white">Mago</span>
+                        </div>
+                        <button onclick="switchTab('profile')" class="w-full text-left px-4 py-2.5 text-xs text-zinc-300 hover:bg-zinc-800/60 flex items-center gap-2.5 cursor-pointer">
+                            <i class="fa-solid fa-user text-purple-400 w-4"></i> Meu Nick e Perfil
+                        </button>
+                        <button onclick="switchTab('notices')" class="w-full text-left px-4 py-2.5 text-xs text-zinc-300 hover:bg-zinc-800/60 flex items-center gap-2.5 cursor-pointer">
+                            <i class="fa-solid fa-bullhorn text-amber-400 w-4"></i> Avisos Importantes
+                        </button>
+                        <button onclick="switchTab('cards')" class="w-full text-left px-4 py-2.5 text-xs text-zinc-300 hover:bg-zinc-800/60 flex items-center gap-2.5 cursor-pointer">
+                            <i class="fa-solid fa-id-card text-emerald-400 w-4"></i> Meus Cards
+                        </button>
+                        <button onclick="switchTab('torneios')" class="w-full text-left px-4 py-2.5 text-xs text-zinc-300 hover:bg-zinc-800/60 flex items-center gap-2.5 cursor-pointer">
+                            <i class="fa-solid fa-trophy text-yellow-500 w-4"></i> Torneios e Exames
+                        </button>
+                        <button onclick="switchTab('schedule')" class="w-full text-left px-4 py-2.5 text-xs text-zinc-300 hover:bg-zinc-800/60 flex items-center gap-2.5 cursor-pointer">
+                            <i class="fa-solid fa-calendar-days text-blue-400 w-4"></i> Cronograma Mensal
+                        </button>
+                        <div class="border-t border-zinc-800/80 mt-1 pt-1">
+                            <button onclick="handleLogout()" class="w-full text-left px-4 py-2.5 text-xs text-red-400 hover:bg-red-950/30 flex items-center gap-2.5 cursor-pointer">
+                                <i class="fa-solid fa-arrow-right-from-bracket w-4"></i> Sair da Conta
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            <!-- CONTEÚDO DAS TABS -->
             <div id="tabWelcome" class="bg-[#121212] border border-[#262626] rounded-3xl p-8 shadow-2xl">
                 <h2 class="text-2xl font-bold text-white mb-2">Bem-vindo ao Grimório, Mago!</h2>
                 <p class="text-zinc-400 text-sm">Gerencie suas magias, consulte os reinos e acompanhe sua evolução no universo de Black Clover.</p>
@@ -128,11 +165,25 @@
                 <div id="cardsGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"></div>
             </div>
             
-            <div id="tabNotices" class="hidden"></div>
-            <div id="tabTournaments" class="hidden"></div>
-            <div id="tabSchedule" class="hidden"></div>
+            <div id="tabNotices" class="hidden bg-[#121212] border border-[#262626] rounded-3xl p-8 shadow-2xl">
+                <h2 class="text-xl font-bold text-white mb-4">Avisos Importantes</h2>
+                <p class="text-zinc-400 text-sm">Nenhum aviso no momento.</p>
+            </div>
+            <div id="tabTournaments" class="hidden bg-[#121212] border border-[#262626] rounded-3xl p-8 shadow-2xl">
+                <h2 class="text-xl font-bold text-white mb-4">Torneios e Exames</h2>
+                <p class="text-zinc-400 text-sm">Acompanhe os próximos exames de cavaleiros mages.</p>
+            </div>
+            <div id="tabSchedule" class="hidden bg-[#121212] border border-[#262626] rounded-3xl p-8 shadow-2xl">
+                <h2 class="text-xl font-bold text-white mb-4">Cronograma Mensal</h2>
+                <p class="text-zinc-400 text-sm">Confira as datas das batalhas e eventos dos reinos.</p>
+            </div>
         </div>
     </main>
+
+    <!-- RODAPÉ -->
+    <footer class="relative z-10 text-center py-4 text-xs text-zinc-500 border-t border-zinc-900">
+        RPG de Black Clover • Sistema Integrado com Supabase
+    </footer>
 
     <!-- CARD MODAL -->
     <div id="cardModal" class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
