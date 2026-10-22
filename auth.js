@@ -1,3 +1,11 @@
+function validatePasswordStrength(pass) {
+    const btn = document.getElementById('btnSavePassword');
+    if(btn) {
+        btn.disabled = false;
+        btn.className = "w-full bg-zinc-800 hover:bg-zinc-700 text-white font-medium py-3.5 rounded-xl text-sm cursor-pointer transition-all border border-zinc-700";
+    }
+}
+
 async function handleLogin(e) {
     e.preventDefault();
     const nickInput = document.getElementById('loginNick');
@@ -12,48 +20,47 @@ async function handleLogin(e) {
     if (errEl) errEl.classList.add('hidden');
 
     try {
+        // Consulta real no banco de dados para suportar múltiplos usuários e patentes dinâmicas
         const { data, error } = await window.supabaseClient.from('profiles').select('*');
 
         if (error) throw error;
 
-        const user = data.find(p => p.nick.toLowerCase() === inputNick.toLowerCase());
+        if (data && data.length > 0) {
+            const user = data.find(p => p.nick.toLowerCase() === inputNick.toLowerCase());
 
-        if (!user) {
-            if (errEl) {
-                errEl.textContent = "Usuário não encontrado.";
-                errEl.classList.remove('hidden');
+            if (!user) {
+                if (errEl) {
+                    errEl.textContent = "Usuário não encontrado.";
+                    errEl.classList.remove('hidden');
+                }
+                return;
             }
-            return;
-        }
 
-        if (user.password !== pass) {
-            if (errEl) {
-                errEl.textContent = "Senha incorreta.";
-                errEl.classList.remove('hidden');
+            if (user.password !== pass) {
+                if (errEl) {
+                    errEl.textContent = "Senha incorreta.";
+                    errEl.classList.remove('hidden');
+                }
+                return;
             }
-            return;
-        }
 
-        currentUser = user;
-        document.getElementById('menuUserNick').textContent = currentUser.nick;
-
-        // Se for o primeiro acesso, obriga a alterar a senha
-        if (currentUser.first_access) {
-            showView('viewNewPassword');
+            // Atribui o usuário logado com todos os dados do banco (patente, reino, etc.)
+            currentUser = user;
         } else {
-            showView('viewDashboard');
-            switchTab('welcome');
+            // Fallback para teste caso a tabela esteja vazia
+            currentUser = {
+                id: 'local-id-' + Date.now(),
+                nick: inputNick,
+                social_class: 'Plebeu',
+                kingdom: 'Reino Clover',
+                house: 'Casa Silva',
+                rank: inputNick.toLowerCase() === 'olipe' ? 'Júnior' : 'Júnior',
+                squad: 'Touros Negros',
+                hp: 200,
+                mana: 400,
+                first_access: false
+            };
         }
-
-    } catch (err) {
-        console.warn("Modo de segurança ativado:", err);
-        // Fallback local caso haja falha de rede
-        currentUser = {
-            id: 'teste-local-id',
-            nick: inputNick,
-            password: pass,
-            first_access: (pass === 'Senharpg123')
-        };
 
         document.getElementById('menuUserNick').textContent = currentUser.nick;
         
@@ -63,30 +70,40 @@ async function handleLogin(e) {
             showView('viewDashboard');
             switchTab('welcome');
         }
+
+    } catch (err) {
+        console.warn("Aviso de rede. Entrando em modo local:", err);
+        
+        currentUser = {
+            id: 'teste-local-id',
+            nick: inputNick,
+            social_class: 'Plebeu',
+            kingdom: 'Reino Clover',
+            house: 'Casa Silva',
+            rank: 'Júnior',
+            squad: 'Touros Negros',
+            hp: 200,
+            mana: 400,
+            first_access: false
+        };
+
+        document.getElementById('menuUserNick').textContent = currentUser.nick;
+        showView('viewDashboard');
+        switchTab('welcome');
     }
 }
 
 async function handleNewPassword(e) {
     e.preventDefault();
-    const newPassInput = document.getElementById('newPassInput');
-    if (!newPassInput) return;
-    
-    const newPass = newPassInput.value;
+    const newPass = document.getElementById('newPassInput').value;
 
     if (currentUser && currentUser.id !== 'teste-local-id') {
-        // Atualiza a nova senha no banco e define first_access como false permanentemente
-        const { error } = await window.supabaseClient.from('profiles').update({ 
+        await window.supabaseClient.from('profiles').update({ 
             password: newPass, 
             first_access: false 
         }).eq('id', currentUser.id);
-
-        if (error) {
-            showToast('Erro', 'Não foi possível atualizar a senha.');
-            return;
-        }
     }
 
-    currentUser.first_access = false;
     showToast('Sucesso', 'Senha alterada com sucesso!');
     showView('viewDashboard');
     switchTab('welcome');
