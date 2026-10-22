@@ -20,7 +20,6 @@ async function handleLogin(e) {
     if (errEl) errEl.classList.add('hidden');
 
     try {
-        // Consulta real no banco de dados para suportar múltiplos usuários e patentes dinâmicas
         const { data, error } = await window.supabaseClient.from('profiles').select('*');
 
         if (error) throw error;
@@ -44,17 +43,15 @@ async function handleLogin(e) {
                 return;
             }
 
-            // Atribui o usuário logado com todos os dados do banco (patente, reino, etc.)
             currentUser = user;
         } else {
-            // Fallback para teste caso a tabela esteja vazia
             currentUser = {
                 id: 'local-id-' + Date.now(),
                 nick: inputNick,
                 social_class: 'Plebeu',
                 kingdom: 'Reino Clover',
                 house: 'Casa Silva',
-                rank: inputNick.toLowerCase() === 'olipe' ? 'Júnior' : 'Júnior',
+                rank: 'Júnior',
                 squad: 'Touros Negros',
                 hp: 200,
                 mana: 400,
@@ -95,13 +92,30 @@ async function handleLogin(e) {
 
 async function handleNewPassword(e) {
     e.preventDefault();
-    const newPass = document.getElementById('newPassInput').value;
+    const newPassInput = document.getElementById('newPassInput');
+    
+    if (!newPassInput || !currentUser) return;
+    
+    const newPass = newPassInput.value;
 
-    if (currentUser && currentUser.id !== 'teste-local-id') {
-        await window.supabaseClient.from('profiles').update({ 
-            password: newPass, 
-            first_access: false 
-        }).eq('id', currentUser.id);
+    // Atualiza a senha e desativa o primeiro acesso diretamente no banco de dados Supabase
+    if (currentUser.id && currentUser.id !== 'teste-local-id' && !currentUser.id.toString().startsWith('local-id-')) {
+        const { error } = await window.supabaseClient
+            .from('profiles')
+            .update({ 
+                password: newPass, 
+                first_access: false 
+            })
+            .eq('id', currentUser.id);
+
+        if (error) {
+            console.error("Erro ao atualizar senha no Supabase:", error);
+            showToast('Erro', 'Não foi possível atualizar a senha no banco.');
+            return;
+        }
+        
+        currentUser.password = newPass;
+        currentUser.first_access = false;
     }
 
     showToast('Sucesso', 'Senha alterada com sucesso!');
