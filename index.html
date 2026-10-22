@@ -1,249 +1,169 @@
 <!DOCTYPE html>
-<html lang="pt-BR" class="dark">
+<html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>RPG de Black Clover - Sistema Oficial</title>
+    
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- FontAwesome for icons -->
+    <!-- FontAwesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Google Fonts Inter -->
+    <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <!-- Supabase JS Client -->
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    
     <style>
-        body { font-family: 'Inter', sans-serif; background-color: #050505; }
-        ::-webkit-scrollbar { width: 8px; }
-        ::-webkit-scrollbar-track { background: #050505; }
-        ::-webkit-scrollbar-thumb { background: #262626; border-radius: 4px; }
-        ::-webkit-scrollbar-thumb:hover { background: #525252; }
+        body { font-family: 'Inter', sans-serif; background-color: #0b0b0b; color: #e4e4e7; }
     </style>
 </head>
-<body class="bg-[#050505] text-slate-100 min-h-screen flex flex-col justify-between selection:bg-zinc-700 selection:text-white">
+<body class="min-h-screen bg-black text-zinc-100 flex flex-col justify-between selection:bg-red-600 selection:text-white">
 
-    <!-- TELA 1: LANDING PAGE COM A FOTO EXATA (inicio.webp) -->
-    <div id="viewLanding" class="h-screen w-screen relative flex flex-col items-center justify-between p-6 sm:p-12 overflow-hidden">
-        <!-- Imagem de fundo local exata -->
-        <div class="absolute inset-0 z-0">
-            <img src="./inicio.webp" alt="Black Clover Fundo" class="w-full h-full object-cover">
-            <div class="absolute inset-0 bg-black/75 backdrop-blur-[1px]"></div>
-        </div>
+    <!-- BACKGROUND IMAGE OVERLAY -->
+    <div class="fixed inset-0 z-0 opacity-20 pointer-events-none bg-cover bg-center" style="background-image: url('inicio.webp');"></div>
 
-        <!-- Topo -->
-        <div class="z-10 text-center space-y-2 pt-4">
-            <div class="inline-flex items-center justify-center p-3 bg-black/60 border border-zinc-800 rounded-2xl text-red-500 shadow-xl">
-                <i class="fa-solid fa-clover text-2xl"></i>
+    <!-- MAIN CONTAINER -->
+    <main class="relative z-10 flex-1 flex flex-col items-center justify-center p-4">
+
+        <!-- 1. LANDING VIEW -->
+        <div id="viewLanding" class="flex flex-col items-center text-center max-w-xl mx-auto py-12">
+            <!-- Nova Logo Circular -->
+            <div class="flex flex-col items-center justify-center mb-6">
+                <img src="logo.png" alt="Logo Black Clover RPG" class="w-20 h-20 rounded-full object-cover shadow-2xl border-2 border-red-600/50 mb-3">
+                <span class="text-xs tracking-widest text-zinc-400 uppercase font-semibold">SISTEMA OFICIAL</span>
             </div>
-            <span class="block text-xs uppercase tracking-widest text-zinc-400 font-semibold">Sistema Oficial</span>
+            <h1 class="text-4xl sm:text-5xl font-extrabold text-white mb-4 tracking-tight">Seja bem-vindo ao RPG de Black Clover</h1>
+            <p class="text-zinc-400 text-sm sm:text-base mb-8 leading-relaxed">Grimório oficial de batalhas, fichas de magias e controle absoluto dos reinos.</p>
+            <button onclick="showLoginView()" class="bg-red-600 hover:bg-red-700 text-white font-semibold px-8 py-3.5 rounded-xl shadow-lg cursor-pointer transition-all flex items-center gap-2">
+                <i class="fa-solid fa-arrow-right-to-bracket"></i> Entrar
+            </button>
         </div>
 
-        <!-- Centro: Título e Botão Vermelho com Texto Preto Funcional -->
-        <div class="z-10 text-center max-w-4xl mx-auto space-y-8 my-auto">
-            <h1 class="text-4xl sm:text-6xl font-extrabold tracking-tight text-white drop-shadow-2xl">
-                Seja bem-vindo ao RPG de Black Clover
-            </h1>
-            <p class="text-zinc-300 text-base sm:text-lg max-w-xl mx-auto font-medium drop-shadow-md">
-                Grimório oficial de batalhas, fichas de magias e controle absoluto dos reinos.
-            </p>
-            <div>
-                <!-- Botão com função direta embutida para garantir o funcionamento imediato -->
-                <button type="button" onclick="document.getElementById('viewLanding').classList.add('hidden'); document.getElementById('viewLogin').classList.remove('hidden');" class="bg-red-600 hover:bg-red-700 text-black font-extrabold px-10 py-4 rounded-2xl shadow-2xl transition-all transform hover:scale-105 cursor-pointer text-base uppercase tracking-wider flex items-center gap-3 mx-auto border border-red-500/40">
-                    <i class="fa-solid fa-right-to-bracket text-black"></i> Entrar
-                </button>
+        <!-- 2. LOGIN VIEW -->
+        <div id="viewLogin" class="hidden w-full max-w-md mx-auto bg-[#121212] border border-[#262626] rounded-3xl p-8 shadow-2xl">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-xl font-bold text-white flex items-center gap-2"><i class="fa-shield-halved text-red-600"></i> Acesso</h2>
+                <button onclick="showLandingView()" class="text-xs text-zinc-400 hover:text-white cursor-pointer">Voltar</button>
             </div>
-        </div>
-
-        <!-- Rodapé -->
-        <div class="z-10 text-center pb-2 text-xs text-zinc-500">
-            &copy; 2026 RPG Black Clover &bull; Todos os direitos reservados
-        </div>
-    </div>
-
-    <!-- TELA 2: LOGIN -->
-    <div id="viewLogin" class="min-h-screen flex items-center justify-center p-4 hidden relative bg-[#050505]">
-        <div class="bg-[#121212] border border-[#262626] rounded-3xl w-full max-w-md p-8 shadow-2xl space-y-6 relative">
-            <div class="flex items-center justify-between">
-                <h2 class="text-xl font-bold text-white flex items-center gap-2"><i class="fa-solid fa-shield-halved text-zinc-400"></i> Acesso</h2>
-                <button type="button" onclick="document.getElementById('viewLogin').classList.add('hidden'); document.getElementById('viewLanding').classList.remove('hidden');" class="text-zinc-400 hover:text-white text-sm cursor-pointer transition-colors">Voltar</button>
-            </div>
-            <form id="loginForm" onsubmit="handleLogin(event)" class="space-y-5">
+            
+            <form onsubmit="handleLogin(event)" class="space-y-4">
                 <div>
                     <label class="block text-xs font-semibold text-zinc-400 uppercase mb-2">Nick / Usuário</label>
-                    <input type="text" id="loginNick" required placeholder="Ex: Olípio" class="w-full bg-black border border-[#262626] rounded-xl px-4 py-3.5 text-sm text-zinc-200 focus:outline-none focus:border-zinc-500 transition-all">
+                    <input type="text" id="loginNick" required class="w-full bg-black border border-zinc-800 rounded-xl px-4 py-3 text-white text-sm focus:outline-none focus:border-red-600 transition-colors" placeholder="Digite seu nick...">
                 </div>
                 <div>
                     <label class="block text-xs font-semibold text-zinc-400 uppercase mb-2">Senha</label>
-                    <input type="password" id="loginPassword" required placeholder="••••••••" class="w-full bg-black border border-[#262626] rounded-xl px-4 py-3.5 text-sm text-zinc-200 focus:outline-none focus:border-zinc-500 transition-all">
+                    <input type="password" id="loginPassword" required class="w-full bg-black border border-zinc-800 rounded-xl px-4 py-3 text-white text-sm focus:outline-none focus:border-red-600 transition-colors" placeholder="••••••••">
                 </div>
-                <div id="loginError" class="text-red-400 text-xs hidden bg-red-950/30 p-3 rounded-xl border border-red-500/30"></div>
-                <button type="submit" id="btnLoginSubmit" class="w-full bg-zinc-800 hover:bg-zinc-700 text-white font-bold py-3.5 rounded-xl text-sm transition-all cursor-pointer flex items-center justify-center gap-2 border border-zinc-700">
-                    <i class="fa-solid fa-right-to-bracket text-zinc-300"></i> Entrar
+                <div id="loginError" class="hidden bg-red-950/50 border border-red-800 text-red-300 text-xs p-3 rounded-xl"></div>
+                <button type="submit" class="w-full bg-red-600 hover:bg-red-700 text-white font-medium py-3.5 rounded-xl text-sm cursor-pointer transition-all shadow-lg flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-arrow-right-to-bracket"></i> Entrar
                 </button>
             </form>
         </div>
-    </div>
 
-    <!-- TELA 3: NOVA SENHA -->
-    <div id="viewNewPassword" class="min-h-screen flex items-center justify-center p-4 hidden bg-[#050505]">
-        <div class="bg-[#121212] border border-[#262626] rounded-3xl w-full max-w-md p-8 shadow-2xl space-y-6">
-            <h2 class="text-xl font-bold text-white flex items-center gap-2"><i class="fa-solid fa-key text-zinc-400"></i> Nova Senha Obrigatória</h2>
-            <form id="newPasswordForm" onsubmit="handleNewPassword(event)" class="space-y-4">
+        <!-- 3. NEW PASSWORD VIEW (PRIMEIRO ACESSO) -->
+        <div id="viewNewPassword" class="hidden w-full max-w-md mx-auto bg-[#121212] border border-[#262626] rounded-3xl p-8 shadow-2xl">
+            <h2 class="text-xl font-bold text-white mb-2">Definir Nova Senha</h2>
+            <p class="text-xs text-zinc-400 mb-6">Como este é o seu primeiro acesso, cadastre uma nova senha definitiva.</p>
+            <form onsubmit="handleNewPassword(event)" class="space-y-4">
                 <div>
-                    <input type="password" id="newPassInput" required oninput="validatePasswordStrength(this.value)" placeholder="Nova senha forte..." class="w-full bg-black border border-[#262626] rounded-xl px-4 py-3.5 text-sm text-zinc-200 focus:outline-none focus:border-zinc-500">
+                    <label class="block text-xs font-semibold text-zinc-400 uppercase mb-2">Nova Senha</label>
+                    <input type="password" id="newPassInput" oninput="validatePasswordStrength(this.value)" required class="w-full bg-black border border-zinc-800 rounded-xl px-4 py-3 text-white text-sm focus:outline-none focus:border-red-600 transition-colors" placeholder="••••••••">
                 </div>
-                <div class="bg-black/60 p-3.5 rounded-xl border border-[#262626] space-y-2 text-xs">
-                    <p id="reqUpper" class="text-zinc-400 flex items-center gap-1.5"><i class="fa-solid fa-circle-xmark"></i> Letra maiúscula (A-Z)</p>
-                    <p id="reqLower" class="text-zinc-400 flex items-center gap-1.5"><i class="fa-solid fa-circle-xmark"></i> Letra minúscula (a-z)</p>
-                    <p id="reqNumber" class="text-zinc-400 flex items-center gap-1.5"><i class="fa-solid fa-circle-xmark"></i> Número (0-9)</p>
-                    <p id="reqSymbol" class="text-zinc-400 flex items-center gap-1.5"><i class="fa-solid fa-circle-xmark"></i> Símbolo (!@#$...)</p>
-                </div>
-                <button type="submit" id="btnSavePassword" disabled class="w-full bg-zinc-800 text-zinc-500 font-medium py-3.5 rounded-xl text-sm cursor-not-allowed transition-all">Salvar Senha</button>
+                <button type="submit" id="btnSavePassword" class="w-full bg-red-600 hover:bg-red-700 text-white font-medium py-3.5 rounded-xl text-sm cursor-pointer transition-all">Salvar Nova Senha</button>
             </form>
         </div>
-    </div>
 
-    <!-- TELA 4: DASHBOARD -->
-    <div id="viewDashboard" class="min-h-screen flex flex-col justify-between hidden bg-[#050505]">
-        <header class="bg-[#121212]/95 backdrop-blur-md border-b border-[#262626] sticky top-0 z-30 shadow-lg">
-            <div class="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
+        <!-- 4. DASHBOARD VIEW -->
+        <div id="viewDashboard" class="hidden w-full max-w-6xl mx-auto">
+            <!-- Navbar do Painel -->
+            <nav class="bg-[#121212] border border-[#262626] rounded-2xl p-4 mb-6 flex justify-between items-center shadow-xl">
                 <div class="flex items-center gap-3">
-                    <div class="bg-zinc-900 border border-zinc-800 p-2.5 rounded-2xl text-zinc-300"><i class="fa-solid fa-clover text-xl"></i></div>
-                    <div>
-                        <h1 class="text-lg font-bold tracking-tight text-white">RPG Black Clover</h1>
-                        <p class="text-xs text-zinc-400">Painel Oficial do Jogador</p>
-                    </div>
+                    <span class="font-bold text-white text-base tracking-wide">Grimório • <span id="menuUserNick" class="text-red-500">Mago</span></span>
                 </div>
-                <div class="relative">
-                    <button onclick="toggleMenu()" class="bg-zinc-900 hover:bg-zinc-800 text-white p-2.5 rounded-xl border border-[#262626] cursor-pointer transition-colors"><i class="fa-solid fa-ellipsis-vertical text-lg px-1.5"></i></button>
-                    <div id="dropdownMenu" class="absolute right-0 mt-2 w-64 bg-[#121212] border border-[#262626] rounded-2xl shadow-2xl hidden z-50 overflow-hidden">
-                        <div class="p-4 border-b border-[#262626] bg-black/60">
-                            <p class="text-xs text-zinc-400">Logado como:</p>
-                            <p id="menuUserNick" class="text-sm font-bold text-zinc-200 truncate mt-0.5">-</p>
-                        </div>
-                        <div class="p-2 space-y-1 text-sm">
-                            <button onclick="switchTab('profile')" class="w-full text-left px-3 py-2.5 rounded-xl hover:bg-zinc-900 text-zinc-300 cursor-pointer transition-colors flex items-center gap-2.5"><i class="fa-solid fa-user text-zinc-400 w-4"></i> Meu Nick e Perfil</button>
-                            <button onclick="switchTab('realms')" class="w-full text-left px-3 py-2.5 rounded-xl hover:bg-zinc-900 text-zinc-300 cursor-pointer transition-colors flex items-center gap-2.5"><i class="fa-solid fa-earth-americas text-zinc-400 w-4"></i> Reinos & Jogadores</button>
-                            <button onclick="switchTab('cards')" class="w-full text-left px-3 py-2.5 rounded-xl hover:bg-zinc-900 text-zinc-300 cursor-pointer transition-colors flex items-center gap-2.5"><i class="fa-solid fa-scroll text-zinc-400 w-4"></i> Meus Cards</button>
-                            <button onclick="switchTab('notices')" class="w-full text-left px-3 py-2.5 rounded-xl hover:bg-zinc-900 text-zinc-300 cursor-pointer transition-colors flex items-center gap-2.5"><i class="fa-solid fa-bullhorn text-zinc-400 w-4"></i> Avisos Importantes</button>
-                            <button onclick="switchTab('tournaments')" class="w-full text-left px-3 py-2.5 rounded-xl hover:bg-zinc-900 text-zinc-300 cursor-pointer transition-colors flex items-center gap-2.5"><i class="fa-solid fa-trophy text-zinc-400 w-4"></i> Torneios e Exames</button>
-                            <button onclick="switchTab('schedule')" class="w-full text-left px-3 py-2.5 rounded-xl hover:bg-zinc-900 text-zinc-300 cursor-pointer transition-colors flex items-center gap-2.5"><i class="fa-solid fa-calendar-days text-zinc-400 w-4"></i> Cronograma Mensal</button>
-                        </div>
-                        <div class="p-2 border-t border-[#262626] bg-black/40">
-                            <button onclick="handleLogout()" class="w-full text-left px-3 py-2.5 rounded-xl hover:bg-zinc-800 text-zinc-300 text-sm cursor-pointer transition-colors flex items-center gap-2.5"><i class="fa-solid fa-right-from-bracket w-4"></i> Sair</button>
-                        </div>
-                    </div>
+                <div class="flex items-center gap-2 sm:gap-4 text-sm">
+                    <button onclick="switchTab('welcome')" class="hover:text-red-500 cursor-pointer transition-colors px-2 py-1">Início</button>
+                    <button onclick="switchTab('cards')" class="hover:text-red-500 cursor-pointer transition-colors px-2 py-1">Cards</button>
+                    <button onclick="switchTab('realms')" class="hover:text-red-500 cursor-pointer transition-colors px-2 py-1">Reinos</button>
+                    <button onclick="switchTab('profile')" class="hover:text-red-500 cursor-pointer transition-colors px-2 py-1">Perfil</button>
+                    <button onclick="handleLogout()" class="text-red-500 hover:text-red-400 cursor-pointer p-2"><i class="fa-solid fa-power-off"></i></button>
                 </div>
-            </div>
-        </header>
+            </nav>
 
-        <main class="max-w-7xl mx-auto px-6 py-8 w-full flex-grow">
-            <!-- ABA: BOAS-VINDAS -->
-            <div id="tabWelcome" class="space-y-6">
-                <div class="bg-[#121212] border border-[#262626] rounded-3xl p-8 shadow-2xl space-y-4">
-                    <h2 class="text-2xl font-bold text-white flex items-center gap-3"><i class="fa-solid fa-wand-magic-sparkles text-zinc-400"></i> Bem-vindo ao Grimório, Mago</h2>
-                    <p class="text-zinc-400 text-sm sm:text-base leading-relaxed max-w-2xl">O seu grimório pessoal está pronto. Consulte o seu perfil completo, verifique os magos dos reinos vizinhos e faça a gestão dos seus cards de batalha com facilidade.</p>
+            <!-- Tabs de Conteúdo -->
+            <div id="tabWelcome" class="bg-[#121212] border border-[#262626] rounded-3xl p-8 shadow-2xl">
+                <h2 class="text-2xl font-bold text-white mb-2">Bem-vindo ao Grimório, Mago!</h2>
+                <p class="text-zinc-400 text-sm">Gerencie suas magias, consulte os reinos e acompanhe sua evolução no universo de Black Clover.</p>
+            </div>
+
+            <div id="tabProfile" class="hidden bg-[#121212] border border-[#262626] rounded-3xl p-8 shadow-2xl">
+                <h2 class="text-xl font-bold text-white mb-6">Ficha do Mago</h2>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div class="bg-black p-4 rounded-2xl border border-zinc-800"><span class="text-xs text-zinc-500 uppercase block mb-1">Nick</span><span id="profNick" class="text-white font-bold">--</span></div>
+                    <div class="bg-black p-4 rounded-2xl border border-zinc-800"><span class="text-xs text-zinc-500 uppercase block mb-1">Patente / Cargo</span><span id="profRank" class="text-white font-bold">--</span></div>
+                    <div class="bg-black p-4 rounded-2xl border border-zinc-800"><span class="text-xs text-zinc-500 uppercase block mb-1">Classe Social</span><span id="profClass" class="text-white font-bold">--</span></div>
+                    <div class="bg-black p-4 rounded-2xl border border-zinc-800"><span class="text-xs text-zinc-500 uppercase block mb-1">Reino</span><span id="profKingdom" class="text-white font-bold">--</span></div>
+                    <div class="bg-black p-4 rounded-2xl border border-zinc-800"><span class="text-xs text-zinc-500 uppercase block mb-1">Casa / Elemento</span><span id="profHouse" class="text-white font-bold">--</span></div>
+                    <div class="bg-black p-4 rounded-2xl border border-zinc-800"><span class="text-xs text-zinc-500 uppercase block mb-1">Esquadrão</span><span id="profSquad" class="text-white font-bold">--</span></div>
+                    <div class="bg-black p-4 rounded-2xl border border-zinc-800"><span class="text-xs text-zinc-500 uppercase block mb-1">Vida (HP)</span><span id="profHp" class="text-white font-bold">--</span></div>
+                    <div class="bg-black p-4 rounded-2xl border border-zinc-800"><span class="text-xs text-zinc-500 uppercase block mb-1">Mana (MP)</span><span id="profMana" class="text-white font-bold">--</span></div>
                 </div>
             </div>
 
-            <!-- ABA: PERFIL -->
-            <div id="tabProfile" class="hidden space-y-6">
-                <h2 class="text-xl font-bold text-white flex items-center gap-2"><i class="fa-solid fa-user text-zinc-400"></i> Ficha do Mago</h2>
-                <div class="bg-[#121212] border border-[#262626] rounded-3xl p-8 shadow-2xl grid grid-cols-1 md:grid-cols-2 gap-8 text-sm">
-                    <div class="space-y-4 bg-black/40 p-6 rounded-2xl border border-[#262626]">
-                        <p class="flex justify-between items-center pb-3 border-b border-[#262626]"><strong class="text-zinc-400">Nick:</strong> <span id="profNick" class="text-white font-bold text-base">-</span></p>
-                        <p class="flex justify-between items-center pb-3 border-b border-[#262626]"><strong class="text-zinc-400">Classe Social:</strong> <span id="profClass" class="font-medium">-</span></p>
-                        <p class="flex justify-between items-center pb-3 border-b border-[#262626]"><strong class="text-zinc-400">Reino:</strong> <span id="profKingdom" class="font-medium">-</span></p>
-                        <p class="flex justify-between items-center"><strong class="text-zinc-400">Casa / Elemento:</strong> <span id="profHouse" class="font-medium">-</span></p>
-                    </div>
-                    <div class="space-y-4 bg-black/40 p-6 rounded-2xl border border-[#262626]">
-                        <p class="flex justify-between items-center pb-3 border-b border-[#262626]"><strong class="text-zinc-400">Patente / Cargo:</strong> <span id="profRank" class="font-medium">-</span></p>
-                        <p class="flex justify-between items-center pb-3 border-b border-[#262626]"><strong class="text-zinc-400">Esquadrão:</strong> <span id="profSquad" class="font-medium">-</span></p>
-                        <p class="flex justify-between items-center pb-3 border-b border-[#262626]"><strong class="text-zinc-400">Vida (HP):</strong> <span id="profHp" class="text-zinc-200 font-bold">-</span></p>
-                        <p class="flex justify-between items-center"><strong class="text-zinc-400">Mana (MP):</strong> <span id="profMana" class="text-zinc-200 font-bold">-</span></p>
-                    </div>
-                </div>
-            </div>
-
-            <!-- ABA: REINOS -->
-            <div id="tabRealms" class="hidden space-y-6">
-                <h2 class="text-xl font-bold text-white flex items-center gap-2"><i class="fa-solid fa-earth-americas text-zinc-400"></i> Consulta de Reinos</h2>
+            <div id="tabRealms" class="hidden bg-[#121212] border border-[#262626] rounded-3xl p-8 shadow-2xl">
+                <h2 class="text-xl font-bold text-white mb-6">Reinos e Magos</h2>
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    <div class="bg-[#121212] border border-[#262626] rounded-3xl p-6 shadow-2xl">
-                        <h3 class="font-bold text-zinc-200 mb-4 text-center pb-3 border-b border-[#262626]">♣️ᘜ🕌 'Reino Clover' 🕌ᘝ♣️</h3>
-                        <div id="listClover" class="space-y-2.5 text-xs text-zinc-300">Carregando...</div>
-                    </div>
-                    <div class="bg-[#121212] border border-[#262626] rounded-3xl p-6 shadow-2xl">
-                        <h3 class="font-bold text-zinc-300 mb-4 text-center pb-3 border-b border-[#262626]">🛡️ᘜ🕍 'Reino Diamond' 🕍ᘝ🛡️</h3>
-                        <div id="listDiamond" class="space-y-2.5 text-xs text-zinc-300">Carregando...</div>
-                    </div>
-                    <div class="bg-[#121212] border border-[#262626] rounded-3xl p-6 shadow-2xl">
-                        <h3 class="font-bold text-zinc-400 mb-4 text-center pb-3 border-b border-[#262626]">♠️ᘜ🏰 'Reino Spade' 🏰ᘝ♠️</h3>
-                        <div id="listSpade" class="space-y-2.5 text-xs text-zinc-300">Carregando...</div>
-                    </div>
+                    <div class="bg-black/40 p-4 rounded-2xl border border-zinc-800"><h3 class="font-bold text-red-500 mb-3">Reino Clover</h3><div id="listClover"></div></div>
+                    <div class="bg-black/40 p-4 rounded-2xl border border-zinc-800"><h3 class="font-bold text-blue-500 mb-3">Reino Diamond</h3><div id="listDiamond"></div></div>
+                    <div class="bg-black/40 p-4 rounded-2xl border border-zinc-800"><h3 class="font-bold text-purple-500 mb-3">Reino Spade</h3><div id="listSpade"></div></div>
                 </div>
             </div>
 
-            <!-- ABA: CARDS -->
-            <div id="tabCards" class="hidden space-y-6">
-                <div class="bg-[#121212] border border-[#262626] rounded-3xl p-6 shadow-2xl flex flex-col sm:flex-row items-center justify-between gap-4">
-                    <input type="text" id="searchInput" oninput="filterCards()" placeholder="Pesquisar magia no grimório..." class="w-full sm:w-96 bg-black border border-[#262626] rounded-xl px-4 py-3 text-sm text-zinc-200 focus:outline-none focus:border-zinc-500 transition-all">
-                    <button onclick="openCardModal()" class="w-full sm:w-auto bg-zinc-800 hover:bg-zinc-700 text-white font-medium px-6 py-3 rounded-xl text-sm cursor-pointer transition-all flex items-center justify-center gap-2 border border-zinc-700"><i class="fa-solid fa-plus"></i> Novo Card</button>
+            <div id="tabCards" class="hidden bg-[#121212] border border-[#262626] rounded-3xl p-8 shadow-2xl">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-xl font-bold text-white">Meus Cards de Magia</h2>
+                    <button onclick="openCardModal()" class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-xl text-xs font-semibold cursor-pointer transition-all">+ Novo Card</button>
                 </div>
-                <div id="cardsGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+                <input type="text" id="searchInput" oninput="filterCards()" placeholder="Pesquisar card..." class="w-full bg-black border border-zinc-800 rounded-xl px-4 py-3 text-white text-sm mb-6 focus:outline-none focus:border-red-600">
+                <div id="cardsGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"></div>
             </div>
-
-            <!-- OUTRAS ABAS -->
-            <div id="tabNotices" class="hidden bg-[#121212] border border-[#262626] rounded-3xl p-8 text-sm text-zinc-300 shadow-2xl">Nenhum aviso importante no momento.</div>
-            <div id="tabTournaments" class="hidden bg-[#121212] border border-[#262626] rounded-3xl p-8 text-sm text-zinc-300 shadow-2xl">Exames de Seleção de Cavaleiros e Torneios em breve.</div>
-            <div id="tabSchedule" class="hidden bg-[#121212] border border-[#262626] rounded-3xl p-8 text-sm text-zinc-300 shadow-2xl">Cronograma mensal atualizado.</div>
-        </main>
-        
-        <footer class="bg-[#121212]/40 border-t border-[#262626] py-6 text-center text-xs text-zinc-500">
-            RPG de Black Clover &bull; Sistema Oficial de Combate
-        </footer>
-    </div>
-
-    <!-- Toast -->
-    <div id="toast" class="fixed bottom-6 right-6 z-50 transform translate-y-20 opacity-0 transition-all duration-300 pointer-events-none">
-        <div class="bg-zinc-900 border border-zinc-700 text-zinc-100 px-5 py-4 rounded-2xl shadow-2xl flex items-center gap-3.5 backdrop-blur-md">
-            <div class="bg-zinc-700 text-white w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold shadow-lg"><i class="fa-solid fa-check"></i></div>
-            <div><p id="toastTitle" class="text-sm font-bold">Sucesso</p><p id="toastSub" class="text-xs text-zinc-400">Feito.</p></div>
+            
+            <div id="tabNotices" class="hidden"></div>
+            <div id="tabTournaments" class="hidden"></div>
+            <div id="tabSchedule" class="hidden"></div>
         </div>
-    </div>
+    </main>
 
-    <!-- Modal Card -->
-    <div id="cardModal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-md hidden items-center justify-center p-4">
-        <div class="bg-[#121212] border border-[#262626] rounded-3xl w-full max-w-md p-8 space-y-5 shadow-2xl">
-            <h3 class="font-bold text-white text-lg flex items-center gap-2"><i class="fa-solid fa-scroll text-zinc-400"></i> Novo Card de Batalha</h3>
+    <!-- CARD MODAL -->
+    <div id="cardModal" class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+        <div class="bg-[#121212] border border-[#262626] rounded-3xl p-6 w-full max-w-lg shadow-2xl">
+            <h3 class="text-lg font-bold text-white mb-4">Criar Novo Card</h3>
             <form onsubmit="saveCardData(event)" class="space-y-4">
-                <div>
-                    <label class="block text-xs font-semibold text-zinc-400 uppercase mb-1.5">Nome da Magia / Card</label>
-                    <input type="text" id="cardNameInput" required placeholder="Ex: Corte Relâmpago" class="w-full bg-black border border-[#262626] rounded-xl px-4 py-3 text-sm text-zinc-200 focus:outline-none focus:border-zinc-500">
+                <div><label class="block text-xs font-semibold text-zinc-400 uppercase mb-1">Nome da Magia</label><input type="text" id="cardNameInput" required class="w-full bg-black border border-zinc-800 rounded-xl px-4 py-2.5 text-white text-sm"></div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div><label class="block text-xs font-semibold text-zinc-400 uppercase mb-1">Dano</label><input type="text" id="cardDamageInput" required class="w-full bg-black border border-zinc-800 rounded-xl px-4 py-2.5 text-white text-sm"></div>
+                    <div><label class="block text-xs font-semibold text-zinc-400 uppercase mb-1">Custo de Mana</label><input type="text" id="cardManaInput" required class="w-full bg-black border border-zinc-800 rounded-xl px-4 py-2.5 text-white text-sm"></div>
                 </div>
-                <div class="grid grid-cols-2 gap-3">
-                    <div>
-                        <label class="block text-xs font-semibold text-zinc-400 uppercase mb-1.5">Dano</label>
-                        <input type="text" id="cardDamageInput" required placeholder="Ex: Normal" class="w-full bg-black border border-[#262626] rounded-xl px-4 py-3 text-sm text-zinc-200 focus:outline-none focus:border-zinc-500">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-semibold text-zinc-400 uppercase mb-1.5">Mana</label>
-                        <input type="text" id="cardManaInput" required placeholder="Ex: 20" class="w-full bg-black border border-[#262626] rounded-xl px-4 py-3 text-sm text-zinc-200 focus:outline-none focus:border-zinc-500">
-                    </div>
-                </div>
-                <div>
-                    <label class="block text-xs font-semibold text-zinc-400 uppercase mb-1.5">Texto do Card / Descrição</label>
-                    <textarea id="cardTextInput" required rows="3" placeholder="Descreva os efeitos da magia..." class="w-full bg-black border border-[#262626] rounded-xl p-3 text-sm text-zinc-200 resize-none focus:outline-none focus:border-zinc-500"></textarea>
-                </div>
-                <div class="flex justify-end gap-3 pt-2">
-                    <button type="button" onclick="closeCardModal()" class="px-5 py-2.5 text-zinc-400 text-sm cursor-pointer hover:text-white transition-colors">Cancelar</button>
-                    <button type="submit" class="bg-zinc-800 hover:bg-zinc-700 text-white px-6 py-2.5 rounded-xl text-sm font-medium cursor-pointer transition-all border border-zinc-700">Salvar Card</button>
+                <div><label class="block text-xs font-semibold text-zinc-400 uppercase mb-1">Descrição / Efeito</label><textarea id="cardTextInput" rows="3" required class="w-full bg-black border border-zinc-800 rounded-xl px-4 py-2.5 text-white text-sm"></textarea></div>
+                <div class="flex gap-3 pt-2">
+                    <button type="button" onclick="closeCardModal()" class="flex-1 bg-zinc-900 hover:bg-zinc-800 text-zinc-400 py-2.5 rounded-xl text-xs font-semibold cursor-pointer border border-zinc-800">Cancelar</button>
+                    <button type="submit" class="flex-1 bg-red-600 hover:bg-red-700 text-white py-2.5 rounded-xl text-xs font-semibold cursor-pointer">Salvar Card</button>
                 </div>
             </form>
         </div>
     </div>
 
-    <!-- Scripts de Logica (Separados) -->
+    <!-- TOAST NOTIFICATION -->
+    <div id="toast" class="fixed bottom-6 right-6 z-50 bg-[#121212] border border-zinc-800 px-5 py-4 rounded-2xl shadow-2xl transform translate-y-20 opacity-0 transition-all duration-300 flex items-center gap-3">
+        <div class="w-2 h-2 rounded-full bg-red-600 animate-pulse"></div>
+        <div>
+            <h4 id="toastTitle" class="text-xs font-bold text-white">Sucesso</h4>
+            <p id="toastSub" class="text-xs text-zinc-400">Ação realizada.</p>
+        </div>
+    </div>
+
+    <!-- SCRIPTS -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="supabase.js"></script>
     <script src="auth.js"></script>
     <script src="rpg.js"></script>
