@@ -29,7 +29,7 @@ async function handleLogin(e) {
 
             if (!user) {
                 if (errEl) {
-                    errEl.textContent = "Usuário não encontrado.";
+                    document.getElementById('loginErrorText').textContent = "Usuário não encontrado.";
                     errEl.classList.remove('hidden');
                 }
                 return;
@@ -37,7 +37,7 @@ async function handleLogin(e) {
 
             if (user.password !== pass) {
                 if (errEl) {
-                    errEl.textContent = "Senha incorreta.";
+                    document.getElementById('loginErrorText').textContent = "Senha incorreta.";
                     errEl.classList.remove('hidden');
                 }
                 return;
@@ -46,14 +46,20 @@ async function handleLogin(e) {
             currentUser = user;
         } else {
             if (errEl) {
-                errEl.textContent = "Nenhum usuário cadastrado no banco.";
+                document.getElementById('loginErrorText').textContent = "Nenhum usuário cadastrado no banco.";
                 errEl.classList.remove('hidden');
             }
             return;
         }
 
-        document.getElementById('menuUserNick').textContent = currentUser.nick;
+        // Atualiza elementos de nick pela interface
+        const menuUserNick = document.getElementById('menuUserNick');
+        if(menuUserNick) menuUserNick.textContent = currentUser.nick;
+
+        const welcomeNick = document.getElementById('welcomeNickName');
+        if(welcomeNick) welcomeNick.textContent = currentUser.nick;
         
+        // Se for primeiro acesso obriga troca de senha, senão vai direto ao painel
         if (currentUser.first_access === true) {
             showView('viewNewPassword');
         } else {
@@ -64,7 +70,7 @@ async function handleLogin(e) {
     } catch (err) {
         console.error("Erro na conexão com o servidor:", err);
         if (errEl) {
-            errEl.textContent = "Erro de conexão com o servidor.";
+            document.getElementById('loginErrorText').textContent = "Erro de conexão com a base de dados.";
             errEl.classList.remove('hidden');
         }
     }
