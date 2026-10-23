@@ -33,8 +33,8 @@
                 <span class="text-xs tracking-widest text-zinc-400 uppercase font-semibold">SISTEMA OFICIAL</span>
             </div>
             <h1 class="text-4xl sm:text-5xl font-extrabold text-white mb-4 tracking-tight">Seja bem-vindo ao RPG de Black Clover</h1>
-            <p class="text-zinc-400 text-sm sm:text-base mb-8 leading-relaxed">Grimório oficial de batalhas, fichas de magias, databook de regras e controle dos reinos.</p>
-            <button onclick="showView('viewLogin')" class="bg-red-600 hover:bg-red-700 text-white font-semibold px-8 py-3.5 rounded-xl shadow-lg cursor-pointer transition-all flex items-center gap-2">
+            <p class="text-zinc-400 text-sm sm:text-base mb-8 leading-relaxed">Grimório oficial de batalhas, fichas de magias e controle absoluto dos reinos.</p>
+            <button onclick="document.getElementById('viewLanding').classList.add('hidden'); document.getElementById('viewLogin').classList.remove('hidden');" class="bg-red-600 hover:bg-red-700 text-white font-semibold px-8 py-3.5 rounded-xl shadow-lg cursor-pointer transition-all flex items-center gap-2">
                 <i class="fa-solid fa-arrow-right-to-bracket"></i> Entrar
             </button>
         </div>
@@ -44,10 +44,10 @@
             <div class="w-full bg-[#121212] border border-[#262626] rounded-3xl p-8 shadow-2xl backdrop-blur-md">
                 <div class="flex justify-between items-center mb-6">
                     <h2 class="text-xl font-bold text-white flex items-center gap-2"><i class="fa-shield-halved text-red-600"></i> Acesso</h2>
-                    <button onclick="showView('viewLanding')" class="text-xs text-zinc-400 hover:text-white cursor-pointer">Voltar</button>
+                    <button onclick="document.getElementById('viewLogin').classList.add('hidden'); document.getElementById('viewLanding').classList.remove('hidden');" class="text-xs text-zinc-400 hover:text-white cursor-pointer">Voltar</button>
                 </div>
                 
-                <form onsubmit="handleLogin(event); return false;" class="space-y-4">
+                <form onsubmit="handleLogin(event)" class="space-y-4">
                     <div>
                         <label class="block text-xs font-semibold text-zinc-400 uppercase mb-2">Nick / Usuário</label>
                         <input type="text" id="loginNick" required class="w-full bg-black border border-zinc-800 rounded-xl px-4 py-3 text-white text-sm focus:outline-none focus:border-red-600 transition-colors" placeholder="Digite seu nick...">
@@ -69,7 +69,7 @@
             <div class="w-full bg-[#121212] border border-[#262626] rounded-3xl p-8 shadow-2xl backdrop-blur-md">
                 <h2 class="text-xl font-bold text-white mb-2">Definir Nova Senha</h2>
                 <p class="text-xs text-zinc-400 mb-6">Como este é o seu primeiro acesso, cadastre uma nova senha definitiva.</p>
-                <form onsubmit="handleNewPassword(event); return false;" class="space-y-4">
+                <form onsubmit="handleNewPassword(event)" class="space-y-4">
                     <div>
                         <label class="block text-xs font-semibold text-zinc-400 uppercase mb-2">Nova Senha</label>
                         <input type="password" id="newPassInput" required class="w-full bg-black border border-zinc-800 rounded-xl px-4 py-3 text-white text-sm focus:outline-none focus:border-red-600 transition-colors" placeholder="••••••••">
@@ -96,52 +96,40 @@
                     </div>
                 </div>
 
-                <!-- Botão de Criar Usuário (Admin) e Botão dos Três Pontinhos -->
-                <div class="flex items-center gap-3">
-                    <button id="btnAddUserAdmin" onclick="openAddUserModal()" class="hidden bg-red-600 hover:bg-red-700 text-white px-3.5 py-2 rounded-xl text-xs font-bold cursor-pointer transition-all flex items-center gap-2 shadow-md">
-                        <i class="fa-solid fa-user-plus"></i> <span class="hidden sm:inline">Novo Mago</span>
+                <!-- Botão do Menu / Três Pontinhos -->
+                <div class="relative">
+                    <button onclick="toggleMenu()" class="w-10 h-10 rounded-xl bg-black border border-zinc-800 hover:border-zinc-700 text-zinc-300 flex items-center justify-center cursor-pointer transition-colors shadow-md">
+                        <i class="fa-solid fa-ellipsis-vertical"></i>
                     </button>
 
-                    <div class="relative">
-                        <button onclick="toggleMenu()" class="w-10 h-10 rounded-xl bg-black border border-zinc-800 hover:border-zinc-700 text-zinc-300 flex items-center justify-center cursor-pointer transition-colors shadow-md">
-                            <i class="fa-solid fa-ellipsis-vertical"></i>
+                    <!-- Dropdown Menu -->
+                    <div id="dropdownMenu" class="hidden absolute right-0 mt-2 w-64 bg-[#121212] border border-zinc-800 rounded-2xl shadow-2xl py-2 z-50">
+                        <div class="px-4 py-2 border-b border-zinc-800 mb-1">
+                            <span class="text-[10px] text-zinc-400 uppercase tracking-wider block">Logado como:</span>
+                            <span id="menuUserNick" class="text-sm font-bold text-white">Mago</span>
+                        </div>
+                        <button onclick="switchTab('profile')" class="w-full text-left px-4 py-2.5 text-xs text-zinc-300 hover:bg-zinc-800/60 flex items-center gap-2.5 cursor-pointer">
+                            <i class="fa-solid fa-user text-zinc-400 w-4"></i> Meu Nick e Perfil
                         </button>
-
-                        <!-- Dropdown Menu -->
-                        <div id="dropdownMenu" class="hidden absolute right-0 mt-2 w-64 bg-[#121212] border border-zinc-800 rounded-2xl shadow-2xl py-2 z-50">
-                            <div class="px-4 py-2 border-b border-zinc-800 mb-1">
-                                <span class="text-[10px] text-zinc-400 uppercase tracking-wider block">Logado como:</span>
-                                <span id="menuUserNick" class="text-sm font-bold text-white">Mago</span>
-                            </div>
-                            <button onclick="switchTab('profile')" class="w-full text-left px-4 py-2.5 text-xs text-zinc-300 hover:bg-zinc-800/60 flex items-center gap-2.5 cursor-pointer">
-                                <i class="fa-solid fa-user text-zinc-400 w-4"></i> Meu Nick e Perfil
+                        <button onclick="switchTab('realms')" class="w-full text-left px-4 py-2.5 text-xs text-zinc-300 hover:bg-zinc-800/60 flex items-center gap-2.5 cursor-pointer">
+                            <i class="fa-solid fa-globe text-cyan-400 w-4"></i> Reinos e Magos
+                        </button>
+                        <button onclick="switchTab('notices')" class="w-full text-left px-4 py-2.5 text-xs text-zinc-300 hover:bg-zinc-800/60 flex items-center gap-2.5 cursor-pointer">
+                            <i class="fa-solid fa-bullhorn text-amber-400 w-4"></i> Avisos Importantes
+                        </button>
+                        <button onclick="switchTab('cards')" class="w-full text-left px-4 py-2.5 text-xs text-zinc-300 hover:bg-zinc-800/60 flex items-center gap-2.5 cursor-pointer">
+                            <i class="fa-solid fa-id-card text-emerald-400 w-4"></i> Meus Cards
+                        </button>
+                        <button onclick="switchTab('torneios')" class="w-full text-left px-4 py-2.5 text-xs text-zinc-300 hover:bg-zinc-800/60 flex items-center gap-2.5 cursor-pointer">
+                            <i class="fa-solid fa-trophy text-yellow-500 w-4"></i> Torneios e Exames
+                        </button>
+                        <button onclick="switchTab('schedule')" class="w-full text-left px-4 py-2.5 text-xs text-zinc-300 hover:bg-zinc-800/60 flex items-center gap-2.5 cursor-pointer">
+                            <i class="fa-solid fa-calendar-days text-blue-400 w-4"></i> Cronograma Mensal
+                        </button>
+                        <div class="border-t border-zinc-800 mt-1 pt-1">
+                            <button onclick="handleLogout()" class="w-full text-left px-4 py-2.5 text-xs text-red-400 hover:bg-red-950/30 flex items-center gap-2.5 cursor-pointer">
+                                <i class="fa-solid fa-arrow-right-from-bracket w-4"></i> Sair da Conta
                             </button>
-                            <button onclick="switchTab('realms')" class="w-full text-left px-4 py-2.5 text-xs text-zinc-300 hover:bg-zinc-800/60 flex items-center gap-2.5 cursor-pointer">
-                                <i class="fa-solid fa-globe text-cyan-400 w-4"></i> Reinos e Magos
-                            </button>
-                            <button onclick="switchTab('cards')" class="w-full text-left px-4 py-2.5 text-xs text-zinc-300 hover:bg-zinc-800/60 flex items-center gap-2.5 cursor-pointer">
-                                <i class="fa-solid fa-id-card text-emerald-400 w-4"></i> Meus Cards
-                            </button>
-                            <button onclick="switchTab('missions')" class="w-full text-left px-4 py-2.5 text-xs text-zinc-300 hover:bg-zinc-800/60 flex items-center gap-2.5 cursor-pointer">
-                                <i class="fa-solid fa-scroll text-red-400 w-4"></i> Missões
-                            </button>
-                            <button onclick="switchTab('databook')" class="w-full text-left px-4 py-2.5 text-xs text-zinc-300 hover:bg-zinc-800/60 flex items-center gap-2.5 cursor-pointer">
-                                <i class="fa-solid fa-book-bookmark text-purple-400 w-4"></i> Regras & Databook VT
-                            </button>
-                            <button onclick="switchTab('schedule')" class="w-full text-left px-4 py-2.5 text-xs text-zinc-300 hover:bg-zinc-800/60 flex items-center gap-2.5 cursor-pointer">
-                                <i class="fa-solid fa-calendar-days text-blue-400 w-4"></i> Cronograma Mensal
-                            </button>
-                            <button onclick="switchTab('notices')" class="w-full text-left px-4 py-2.5 text-xs text-zinc-300 hover:bg-zinc-800/60 flex items-center gap-2.5 cursor-pointer">
-                                <i class="fa-solid fa-bullhorn text-amber-400 w-4"></i> Avisos Importantes
-                            </button>
-                            <button onclick="switchTab('torneios')" class="w-full text-left px-4 py-2.5 text-xs text-zinc-300 hover:bg-zinc-800/60 flex items-center gap-2.5 cursor-pointer">
-                                <i class="fa-solid fa-trophy text-yellow-500 w-4"></i> Torneios e Exames
-                            </button>
-                            <div class="border-t border-zinc-800 mt-1 pt-1">
-                                <button onclick="handleLogout()" class="w-full text-left px-4 py-2.5 text-xs text-red-400 hover:bg-red-950/30 flex items-center gap-2.5 cursor-pointer">
-                                    <i class="fa-solid fa-arrow-right-from-bracket w-4"></i> Sair da Conta
-                                </button>
-                            </div>
                         </div>
                     </div>
                 </div>
@@ -153,7 +141,7 @@
                 <p class="text-zinc-400 text-sm mb-8">Gerencie suas magias, consulte os reinos e acompanhe sua evolução no universo de Black Clover.</p>
 
                 <!-- Grid de Atalhos -->
-                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                     <div onclick="switchTab('cards')" class="bg-black/60 border border-zinc-800 rounded-2xl p-6 cursor-pointer hover:border-zinc-600 transition-all group">
                         <div class="w-12 h-12 rounded-xl bg-emerald-950/40 border border-emerald-800/40 flex items-center justify-center text-emerald-400 text-xl mb-4 group-hover:scale-110 transition-transform">
                             <i class="fa-solid fa-id-card"></i>
@@ -168,30 +156,6 @@
                         </div>
                         <h3 class="font-bold text-white text-lg mb-2">Reinos e Magos</h3>
                         <p class="text-zinc-400 text-xs leading-relaxed">Confira a hierarquia dos reinos Clover, Diamond e Spade.</p>
-                    </div>
-
-                    <div onclick="switchTab('missions')" class="bg-black/60 border border-zinc-800 rounded-2xl p-6 cursor-pointer hover:border-zinc-600 transition-all group">
-                        <div class="w-12 h-12 rounded-xl bg-red-950/40 border border-red-800/40 flex items-center justify-center text-red-400 text-xl mb-4 group-hover:scale-110 transition-transform">
-                            <i class="fa-solid fa-scroll"></i>
-                        </div>
-                        <h3 class="font-bold text-white text-lg mb-2">Missões do Reino</h3>
-                        <p class="text-zinc-400 text-xs leading-relaxed">Confira as missões disponíveis para acumular Yuls e Dracmas.</p>
-                    </div>
-
-                    <div onclick="openPlaqueModal()" class="bg-black/60 border border-zinc-800 rounded-2xl p-6 cursor-pointer hover:border-zinc-600 transition-all group">
-                        <div class="w-12 h-12 rounded-xl bg-amber-950/40 border border-amber-800/40 flex items-center justify-center text-amber-400 text-xl mb-4 group-hover:scale-110 transition-transform">
-                            ⚔️
-                        </div>
-                        <h3 class="font-bold text-white text-lg mb-2">Placa de Luta</h3>
-                        <p class="text-zinc-400 text-xs leading-relaxed">Gere e copie a placa oficial para duelos no WhatsApp.</p>
-                    </div>
-
-                    <div onclick="switchTab('databook')" class="bg-black/60 border border-zinc-800 rounded-2xl p-6 cursor-pointer hover:border-zinc-600 transition-all group">
-                        <div class="w-12 h-12 rounded-xl bg-purple-950/40 border border-purple-800/40 flex items-center justify-center text-purple-400 text-xl mb-4 group-hover:scale-110 transition-transform">
-                            <i class="fa-solid fa-book-bookmark"></i>
-                        </div>
-                        <h3 class="font-bold text-white text-lg mb-2">Databook VT</h3>
-                        <p class="text-zinc-400 text-xs leading-relaxed">Consulte as 52 regras de combate e efeitos contínuos.</p>
                     </div>
 
                     <div onclick="switchTab('schedule')" class="bg-black/60 border border-zinc-800 rounded-2xl p-6 cursor-pointer hover:border-zinc-600 transition-all group">
@@ -212,7 +176,7 @@
                     <div class="bg-black/60 p-4 rounded-2xl border border-zinc-800"><span class="text-xs text-zinc-400 uppercase block mb-1">Patente / Cargo</span><span id="profRank" class="text-white font-bold">--</span></div>
                     <div class="bg-black/60 p-4 rounded-2xl border border-zinc-800"><span class="text-xs text-zinc-400 uppercase block mb-1">Classe Social</span><span id="profClass" class="text-white font-bold">--</span></div>
                     <div class="bg-black/60 p-4 rounded-2xl border border-zinc-800"><span class="text-xs text-zinc-400 uppercase block mb-1">Reino</span><span id="profKingdom" class="text-white font-bold">--</span></div>
-                    <div class="bg-black/60 p-4 rounded-2xl border border-zinc-800"><span class="text-xs text-zinc-400 uppercase block mb-1">Casa / Família</span><span id="profHouse" class="text-white font-bold">--</span></div>
+                    <div class="bg-black/60 p-4 rounded-2xl border border-zinc-800"><span class="text-xs text-zinc-400 uppercase block mb-1">Casa / Elemento</span><span id="profHouse" class="text-white font-bold">--</span></div>
                     <div class="bg-black/60 p-4 rounded-2xl border border-zinc-800"><span class="text-xs text-zinc-400 uppercase block mb-1">Esquadrão</span><span id="profSquad" class="text-white font-bold">--</span></div>
                     <div class="bg-black/60 p-4 rounded-2xl border border-zinc-800"><span class="text-xs text-zinc-400 uppercase block mb-1">Vida (HP)</span><span id="profHp" class="text-white font-bold">--</span></div>
                     <div class="bg-black/60 p-4 rounded-2xl border border-zinc-800"><span class="text-xs text-zinc-400 uppercase block mb-1">Mana (MP)</span><span id="profMana" class="text-white font-bold">--</span></div>
@@ -238,6 +202,7 @@
                     </button>
                 </div>
 
+                <!-- Barra de Pílulas de Categoria -->
                 <div class="flex items-center gap-2 overflow-x-auto no-scrollbar mb-6 pb-2">
                     <button onclick="filterCategory('TODAS')" id="pill-TODAS" class="pill-btn active bg-red-600 text-white px-4 py-2 rounded-full text-xs font-bold whitespace-nowrap cursor-pointer transition-all flex items-center gap-2">
                         <i class="fa-solid fa-graduation-cap"></i> Todas
@@ -268,53 +233,20 @@
                 <input type="text" id="searchInput" oninput="filterCards()" placeholder="Pesquisar card por texto..." class="w-full bg-black/60 border border-zinc-800 rounded-xl px-4 py-3 text-white text-sm mb-6 focus:outline-none focus:border-zinc-500 transition-colors">
                 <div id="cardsGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"></div>
             </div>
-
-            <!-- ABA MISSÕES -->
-            <div id="tabMissions" class="hidden w-full bg-[#121212]/95 border border-[#262626] rounded-3xl p-8 shadow-2xl backdrop-blur-md">
-                <div class="flex justify-between items-center mb-6">
-                    <h2 class="text-xl font-bold text-white flex items-center gap-2"><i class="fa-solid fa-scroll text-red-500"></i> Missões do Reino</h2>
-                    <button id="btnNewMissionAdmin" onclick="openAnnouncementModal('missions')" class="hidden bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-xl text-xs font-semibold cursor-pointer transition-all">+ Nova Missão</button>
-                </div>
-                <div id="containerMissions" class="space-y-4"></div>
-            </div>
-
-            <!-- ABA TORNEIOS E EXAMES -->
-            <div id="tabTournaments" class="hidden w-full bg-[#121212]/95 border border-[#262626] rounded-3xl p-8 shadow-2xl backdrop-blur-md">
-                <div class="flex justify-between items-center mb-6">
-                    <h2 class="text-xl font-bold text-white flex items-center gap-2"><i class="fa-solid fa-trophy text-yellow-500"></i> Torneios e Exames</h2>
-                    <button id="btnNewTournamentAdmin" onclick="openAnnouncementModal('tournaments')" class="hidden bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-xl text-xs font-semibold cursor-pointer transition-all">+ Novo Torneio/Exame</button>
-                </div>
-                <div id="containerTournaments" class="space-y-4"></div>
-            </div>
-
-            <!-- ABA CRONOGRAMA MENSAL -->
-            <div id="tabSchedule" class="hidden w-full bg-[#121212]/95 border border-[#262626] rounded-3xl p-8 shadow-2xl backdrop-blur-md">
-                <div class="flex justify-between items-center mb-6">
-                    <h2 class="text-xl font-bold text-white flex items-center gap-2"><i class="fa-solid fa-calendar-days text-blue-400"></i> Cronograma Mensal</h2>
-                    <button id="btnNewScheduleAdmin" onclick="openAnnouncementModal('schedule')" class="hidden bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-xl text-xs font-semibold cursor-pointer transition-all">+ Novo Agendamento</button>
-                </div>
-                <div id="containerSchedule" class="space-y-4"></div>
-            </div>
-
-            <!-- ABA AVISOS IMPORTANTES -->
+            
             <div id="tabNotices" class="hidden w-full bg-[#121212]/95 border border-[#262626] rounded-3xl p-8 shadow-2xl backdrop-blur-md">
-                <div class="flex justify-between items-center mb-6">
-                    <h2 class="text-xl font-bold text-white flex items-center gap-2"><i class="fa-solid fa-bullhorn text-amber-400"></i> Avisos Importantes</h2>
-                    <button id="btnNewNoticeAdmin" onclick="openAnnouncementModal('notices')" class="hidden bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-xl text-xs font-semibold cursor-pointer transition-all">+ Novo Aviso</button>
-                </div>
-                <div id="containerNotices" class="space-y-4"></div>
+                <h2 class="text-xl font-bold text-white mb-4">Avisos Importantes</h2>
+                <p class="text-zinc-400 text-sm">Nenhum aviso no momento.</p>
             </div>
-
-            <!-- ABA REGRAS & DATABOOK VT -->
-            <div id="tabDatabook" class="hidden w-full bg-[#121212]/95 border border-[#262626] rounded-3xl p-8 shadow-2xl backdrop-blur-md">
-                <h2 class="text-xl font-bold text-white mb-2 flex items-center gap-2">
-                    <i class="fa-solid fa-book-bookmark text-purple-400"></i> Databook VT & Regras do WhatsApp
+            <div id="tabTournaments" class="hidden w-full bg-[#121212]/95 border border-[#262626] rounded-3xl p-8 shadow-2xl backdrop-blur-md">
+                <h2 class="text-xl font-bold text-white mb-4">Torneios e Exames</h2>
+                <p class="text-zinc-400 text-sm">Acompanhe os próximos exames de cavaleiros mages.</p>
+            </div>
+            <div id="tabSchedule" class="hidden w-full bg-[#121212]/95 border border-[#262626] rounded-3xl p-8 shadow-2xl backdrop-blur-md">
+                <h2 class="text-xl font-bold text-white mb-4 flex items-center gap-2">
+                    <i class="fa-solid fa-calendar-days text-blue-400"></i> Cronograma Mensal
                 </h2>
-                <p class="text-xs text-zinc-400 mb-6">Consulte rapidamente todas as 52 regras oficiais e tabelas de efeitos do combate.</p>
-                
-                <input type="text" id="databookSearch" oninput="filterDatabook()" placeholder="Pesquisar regra (ex: paralisia, dreno, réplica)..." class="w-full bg-black/60 border border-zinc-800 rounded-xl px-4 py-3 text-white text-sm mb-6 focus:outline-none focus:border-purple-500">
-                
-                <div id="databookList" class="space-y-3 max-h-[600px] overflow-y-auto pr-2 no-scrollbar"></div>
+                <div id="scheduleContainer"></div>
             </div>
         </div>
     </main>
@@ -323,201 +255,6 @@
     <footer class="relative z-10 text-center py-4 text-xs text-zinc-500 border-t border-zinc-900">
         RPG de Black Clover • Sistema Integrado com Supabase
     </footer>
-
-    <!-- MODAL CADASTRAR NOVO USUÁRIO (ADMIN) -->
-    <div id="addUserModal" class="hidden fixed inset-0 z-50 bg-black/85 backdrop-blur-sm flex items-center justify-center p-4">
-        <div class="bg-[#121212] border border-zinc-800 rounded-3xl p-6 w-full max-w-lg shadow-2xl max-h-[90vh] overflow-y-auto no-scrollbar">
-            <h3 class="text-lg font-bold text-white mb-4 flex items-center gap-2">
-                <i class="fa-solid fa-user-plus text-red-500"></i> Cadastrar Novo Mago (Admin)
-            </h3>
-            <form onsubmit="saveNewUser(event); return false;" class="space-y-4">
-                <div>
-                    <label class="block text-xs font-semibold text-zinc-400 uppercase mb-1">Nick / Usuário</label>
-                    <input type="text" id="newPlayerNick" required class="w-full bg-black border border-zinc-800 rounded-xl px-4 py-2.5 text-white text-sm focus:outline-none focus:border-red-600">
-                </div>
-                <div>
-                    <label class="block text-xs font-semibold text-zinc-400 uppercase mb-1">Senha Provisória</label>
-                    <input type="password" id="newPlayerPass" required class="w-full bg-black border border-zinc-800 rounded-xl px-4 py-2.5 text-white text-sm focus:outline-none focus:border-red-600" placeholder="••••••••">
-                </div>
-                <div class="grid grid-cols-2 gap-3">
-                    <div>
-                        <label class="block text-xs font-semibold text-zinc-400 uppercase mb-1">Reino</label>
-                        <select id="newPlayerKingdom" class="w-full bg-black border border-zinc-800 rounded-xl px-3 py-2.5 text-white text-xs">
-                            <option value="Reino Clover">Reino Clover 🕌</option>
-                            <option value="Reino Diamond">Reino Diamond 🕍</option>
-                            <option value="Reino Spade">Reino Spade 🏰</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label class="block text-xs font-semibold text-zinc-400 uppercase mb-1">Classe Social</label>
-                        <select id="newPlayerClass" class="w-full bg-black border border-zinc-800 rounded-xl px-3 py-2.5 text-white text-xs">
-                            <option value="Plebeu">Plebeu 👨🏻‍🌾</option>
-                            <option value="Nobre">Nobre 🤵🏻</option>
-                            <option value="Realeza">Realeza 🤴🏻</option>
-                        </select>
-                    </div>
-                </div>
-                <div class="grid grid-cols-2 gap-3">
-                    <div>
-                        <label class="block text-xs font-semibold text-zinc-400 uppercase mb-1">Casa / Família</label>
-                        <select id="newPlayerHouse" class="w-full bg-black border border-zinc-800 rounded-xl px-3 py-2.5 text-white text-xs">
-                            <option value="Casa Silva">Casa Silva 💧</option>
-                            <option value="Casa Vermillion">Casa Vermillion 🔥</option>
-                            <option value="Casa Silvamillion">Casa Silvamillion 🌪️</option>
-                            <option value="Casa Voltia">Casa Voltia ⚡</option>
-                            <option value="Casa Faust">Casa Faust 🌑</option>
-                            <option value="Casa Kruger">Casa Kruger 🌀</option>
-                            <option value="Casa Mars">Casa Mars 💎</option>
-                            <option value="Casa Whomalt">Casa Whomalt 💨</option>
-                            <option value="Casa Mariella">Casa Mariella ❄️</option>
-                            <option value="Casa Zogratis">Casa Zogratis ☠️</option>
-                            <option value="Casa Grinberryall">Casa Grinberryall 🌟</option>
-                            <option value="Casa Novachrono">Casa Novachrono ⏳</option>
-                            <option value="Nenhuma">Nenhuma ❌</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label class="block text-xs font-semibold text-zinc-400 uppercase mb-1">Esquadrão</label>
-                        <select id="newPlayerSquad" class="w-full bg-black border border-zinc-800 rounded-xl px-3 py-2.5 text-white text-xs">
-                            <option value="Nenhum">Nenhum ❌</option>
-                            <option value="Alvorecer Dourado">Alvorecer Dourado ☀️</option>
-                            <option value="Touros Negros">Touros Negros 🐃</option>
-                            <option value="Águias de Prata">Águias de Prata 🦅</option>
-                            <option value="Reis Leões Carmesins">Reis Leões Carmesins 🦁</option>
-                            <option value="Rosa Azul">Rosa Azul 🌹</option>
-                            <option value="Louva-a-Deus Verdes">Louva-a-Deus Verdes 🦗</option>
-                            <option value="Pavões Corais">Pavões Corais 🦚</option>
-                            <option value="Orcas Púrpuras">Orcas Púrpuras 🫍</option>
-                            <option value="Cervo Ciano">Cervo Ciano 💠</option>
-                            <option value="Serpente Branca">Serpente Branca 🐍</option>
-                        </select>
-                    </div>
-                </div>
-                <div class="grid grid-cols-2 gap-3">
-                    <div>
-                        <label class="block text-xs font-semibold text-zinc-400 uppercase mb-1">Patente</label>
-                        <select id="newPlayerRank" class="w-full bg-black border border-zinc-800 rounded-xl px-3 py-2.5 text-white text-xs">
-                            <option value="Júnior">Júnior ☪️</option>
-                            <option value="Intermediário">Intermediário ⚜️</option>
-                            <option value="Sênior">Sênior 🔱</option>
-                            <option value="Grão Mago">Grão Mago ⚛️</option>
-                            <option value="Capitão">Capitão ⚖️</option>
-                            <option value="Rei Mago">Rei Mago 👑</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label class="block text-xs font-semibold text-zinc-400 uppercase mb-1">É Administrador?</label>
-                        <select id="newPlayerIsAdmin" class="w-full bg-black border border-zinc-800 rounded-xl px-3 py-2.5 text-white text-xs">
-                            <option value="false">Não</option>
-                            <option value="true">Sim</option>
-                        </select>
-                    </div>
-                </div>
-                <div class="flex gap-3 pt-2">
-                    <button type="button" onclick="closeAddUserModal()" class="flex-1 bg-zinc-900 hover:bg-zinc-800 text-zinc-400 py-3 rounded-xl text-xs font-semibold border border-zinc-800">Cancelar</button>
-                    <button type="submit" class="flex-1 bg-red-600 hover:bg-red-700 text-white py-3 rounded-xl text-xs font-bold">Cadastrar Mago</button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <!-- MODAL EDITAR USUÁRIO (ADMIN) -->
-    <div id="editUserModal" class="hidden fixed inset-0 z-50 bg-black/85 backdrop-blur-sm flex items-center justify-center p-4">
-        <div class="bg-[#121212] border border-zinc-800 rounded-3xl p-6 w-full max-w-lg shadow-2xl max-h-[90vh] overflow-y-auto no-scrollbar">
-            <h3 class="text-lg font-bold text-white mb-4 flex items-center gap-2">
-                <i class="fa-solid fa-user-gear text-amber-500"></i> Editar Mago (Admin)
-            </h3>
-            <form onsubmit="saveEditedUser(event); return false;" class="space-y-4">
-                <input type="hidden" id="editUserId">
-                <div>
-                    <label class="block text-xs font-semibold text-zinc-400 uppercase mb-1">Nick / Usuário</label>
-                    <input type="text" id="editPlayerNick" required class="w-full bg-black border border-zinc-800 rounded-xl px-4 py-2.5 text-white text-sm focus:outline-none focus:border-amber-500">
-                </div>
-                <div>
-                    <label class="block text-xs font-semibold text-zinc-400 uppercase mb-1">Senha</label>
-                    <input type="text" id="editPlayerPass" required class="w-full bg-black border border-zinc-800 rounded-xl px-4 py-2.5 text-white text-sm focus:outline-none focus:border-amber-500">
-                </div>
-                <div class="grid grid-cols-2 gap-3">
-                    <div>
-                        <label class="block text-xs font-semibold text-zinc-400 uppercase mb-1">Reino</label>
-                        <select id="editPlayerKingdom" class="w-full bg-black border border-zinc-800 rounded-xl px-3 py-2.5 text-white text-xs">
-                            <option value="Reino Clover">Reino Clover 🕌</option>
-                            <option value="Reino Diamond">Reino Diamond 🕍</option>
-                            <option value="Reino Spade">Reino Spade 🏰</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label class="block text-xs font-semibold text-zinc-400 uppercase mb-1">Classe Social</label>
-                        <select id="editPlayerClass" class="w-full bg-black border border-zinc-800 rounded-xl px-3 py-2.5 text-white text-xs">
-                            <option value="Plebeu">Plebeu 👨🏻‍🌾</option>
-                            <option value="Nobre">Nobre 🤵🏻</option>
-                            <option value="Realeza">Realeza 🤴🏻</option>
-                        </select>
-                    </div>
-                </div>
-                <div class="grid grid-cols-2 gap-3">
-                    <div>
-                        <label class="block text-xs font-semibold text-zinc-400 uppercase mb-1">Casa / Família</label>
-                        <select id="editPlayerHouse" class="w-full bg-black border border-zinc-800 rounded-xl px-3 py-2.5 text-white text-xs">
-                            <option value="Casa Silva">Casa Silva 💧</option>
-                            <option value="Casa Vermillion">Casa Vermillion 🔥</option>
-                            <option value="Casa Silvamillion">Casa Silvamillion 🌪️</option>
-                            <option value="Casa Voltia">Casa Voltia ⚡</option>
-                            <option value="Casa Faust">Casa Faust 🌑</option>
-                            <option value="Casa Kruger">Casa Kruger 🌀</option>
-                            <option value="Casa Mars">Casa Mars 💎</option>
-                            <option value="Casa Whomalt">Casa Whomalt 💨</option>
-                            <option value="Casa Mariella">Casa Mariella ❄️</option>
-                            <option value="Casa Zogratis">Casa Zogratis ☠️</option>
-                            <option value="Casa Grinberryall">Casa Grinberryall 🌟</option>
-                            <option value="Casa Novachrono">Casa Novachrono ⏳</option>
-                            <option value="Nenhuma">Nenhuma ❌</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label class="block text-xs font-semibold text-zinc-400 uppercase mb-1">Esquadrão</label>
-                        <select id="editPlayerSquad" class="w-full bg-black border border-zinc-800 rounded-xl px-3 py-2.5 text-white text-xs">
-                            <option value="Nenhum">Nenhum ❌</option>
-                            <option value="Alvorecer Dourado">Alvorecer Dourado ☀️</option>
-                            <option value="Touros Negros">Touros Negros 🐃</option>
-                            <option value="Águias de Prata">Águias de Prata 🦅</option>
-                            <option value="Reis Leões Carmesins">Reis Leões Carmesins 🦁</option>
-                            <option value="Rosa Azul">Rosa Azul 🌹</option>
-                            <option value="Louva-a-Deus Verdes">Louva-a-Deus Verdes 🦗</option>
-                            <option value="Pavões Corais">Pavões Corais 🦚</option>
-                            <option value="Orcas Púrpuras">Orcas Púrpuras 🫍</option>
-                            <option value="Cervo Ciano">Cervo Ciano 💠</option>
-                            <option value="Serpente Branca">Serpente Branca 🐍</option>
-                        </select>
-                    </div>
-                </div>
-                <div class="grid grid-cols-2 gap-3">
-                    <div>
-                        <label class="block text-xs font-semibold text-zinc-400 uppercase mb-1">Patente</label>
-                        <select id="editPlayerRank" class="w-full bg-black border border-zinc-800 rounded-xl px-3 py-2.5 text-white text-xs">
-                            <option value="Júnior">Júnior ☪️</option>
-                            <option value="Intermediário">Intermediário ⚜️</option>
-                            <option value="Sênior">Sênior 🔱</option>
-                            <option value="Grão Mago">Grão Mago ⚛️</option>
-                            <option value="Capitão">Capitão ⚖️</option>
-                            <option value="Rei Mago">Rei Mago 👑</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label class="block text-xs font-semibold text-zinc-400 uppercase mb-1">É Administrador?</label>
-                        <select id="editPlayerIsAdmin" class="w-full bg-black border border-zinc-800 rounded-xl px-3 py-2.5 text-white text-xs">
-                            <option value="false">Não</option>
-                            <option value="true">Sim</option>
-                        </select>
-                    </div>
-                </div>
-                <div class="flex gap-3 pt-2">
-                    <button type="button" onclick="closeEditUserModal()" class="flex-1 bg-zinc-900 hover:bg-zinc-800 text-zinc-400 py-3 rounded-xl text-xs font-semibold border border-zinc-800">Cancelar</button>
-                    <button type="submit" class="flex-1 bg-amber-600 hover:bg-amber-700 text-white py-3 rounded-xl text-xs font-bold">Salvar Alterações</button>
-                </div>
-            </form>
-        </div>
-    </div>
 
     <!-- CARD MODAL -->
     <div id="cardModal" class="hidden fixed inset-0 z-50 bg-black/85 backdrop-blur-sm flex items-center justify-center p-4">
@@ -549,95 +286,6 @@
         </div>
     </div>
 
-    <!-- MODAL DE COMUNICADOS (ADMIN) -->
-    <div id="announcementModal" class="hidden fixed inset-0 z-50 bg-black/85 backdrop-blur-sm flex items-center justify-center p-4">
-        <div class="bg-[#121212] border border-zinc-800 rounded-3xl p-6 w-full max-w-lg shadow-2xl">
-            <h3 class="text-lg font-bold text-white mb-4 flex items-center gap-2">
-                👑 Publicar Comunicado (Admin)
-            </h3>
-            <form onsubmit="saveAnnouncement(event)" class="space-y-4">
-                <input type="hidden" id="annCategory">
-                
-                <div>
-                    <label class="block text-xs font-semibold text-zinc-400 uppercase mb-1">Título</label>
-                    <input type="text" id="annTitle" required class="w-full bg-black border border-zinc-800 rounded-xl px-4 py-2.5 text-white text-sm focus:outline-none focus:border-red-600">
-                </div>
-
-                <div>
-                    <label class="block text-xs font-semibold text-zinc-400 uppercase mb-1">Conteúdo / Detalhes</label>
-                    <textarea id="annContent" rows="4" required class="w-full bg-black border border-zinc-800 rounded-xl px-4 py-2.5 text-white text-sm font-mono focus:outline-none focus:border-red-600"></textarea>
-                </div>
-
-                <div class="grid grid-cols-2 gap-4">
-                    <div>
-                        <label class="block text-xs font-semibold text-zinc-400 uppercase mb-1">Quando Postar?</label>
-                        <select id="annPublishType" onchange="togglePublishSchedule(this.value)" class="w-full bg-black border border-zinc-800 rounded-xl px-3 py-2.5 text-white text-xs">
-                            <option value="now">Publicar Agora</option>
-                            <option value="schedule">Agendar Data/Hora</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label class="block text-xs font-semibold text-zinc-400 uppercase mb-1">Tempo de Exibição</label>
-                        <select id="annDuration" class="w-full bg-black border border-zinc-800 rounded-xl px-3 py-2.5 text-white text-xs">
-                            <option value="none">Sem expiração (Permanente)</option>
-                            <option value="24h">24 Horas</option>
-                            <option value="3d">3 Dias</option>
-                            <option value="7d">7 Dias</option>
-                            <option value="30d">30 Dias (1 Mês)</option>
-                        </select>
-                    </div>
-                </div>
-
-                <div id="annScheduleContainer" class="hidden">
-                    <label class="block text-xs font-semibold text-zinc-400 uppercase mb-1">Data e Hora de Publicação</label>
-                    <input type="datetime-local" id="annPublishDate" class="w-full bg-black border border-zinc-800 rounded-xl px-4 py-2.5 text-white text-xs">
-                </div>
-
-                <div class="flex gap-3 pt-2">
-                    <button type="button" onclick="closeAnnouncementModal()" class="flex-1 bg-zinc-900 hover:bg-zinc-800 text-zinc-400 py-3 rounded-xl text-xs font-semibold border border-zinc-800">Cancelar</button>
-                    <button type="submit" class="flex-1 bg-red-600 hover:bg-red-700 text-white py-3 rounded-xl text-xs font-bold">Publicar Comunicado</button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <!-- GERADOR DE PLACA MODAL -->
-    <div id="plaqueModal" class="hidden fixed inset-0 z-50 bg-black/85 backdrop-blur-sm flex items-center justify-center p-4">
-        <div class="bg-[#121212] border border-zinc-800 rounded-3xl p-6 w-full max-w-lg shadow-2xl">
-            <h3 class="text-lg font-bold text-white mb-4">Gerar Placa de Luta para WhatsApp</h3>
-            <div class="space-y-4">
-                <div>
-                    <label class="block text-xs font-semibold text-zinc-400 uppercase mb-1">Seu Nick & Elemento</label>
-                    <input type="text" id="plaqueMyNick" class="w-full bg-black border border-zinc-800 rounded-xl px-4 py-2.5 text-white text-sm" placeholder="Ex: Olipe 🔥">
-                </div>
-                <div>
-                    <label class="block text-xs font-semibold text-zinc-400 uppercase mb-1">Nick do Oponente & Elemento</label>
-                    <input type="text" id="plaqueOppNick" class="w-full bg-black border border-zinc-800 rounded-xl px-4 py-2.5 text-white text-sm" placeholder="Ex: Cooper 🌑">
-                </div>
-                <div>
-                    <label class="block text-xs font-semibold text-zinc-400 uppercase mb-1">Patente do Oponente</label>
-                    <select id="plaqueOppRank" class="w-full bg-black border border-zinc-800 rounded-xl px-4 py-2.5 text-white text-sm">
-                        <option value="Júnior">Júnior (200HP / 400MP)</option>
-                        <option value="Intermediário">Intermediário (300HP / 600MP)</option>
-                        <option value="Sênior">Sênior (400HP / 800MP)</option>
-                        <option value="Grão Mago">Grão Mago (800HP / 1600MP)</option>
-                        <option value="Capitão">Capitão (600HP / 1200MP)</option>
-                        <option value="Rei Mago">Rei Mago (900HP / 1800MP)</option>
-                        <option value="Imperador Supremo">Imperador Supremo (1100HP / 2200MP)</option>
-                    </select>
-                </div>
-                <div>
-                    <label class="block text-xs font-semibold text-zinc-400 uppercase mb-1">Prévia da Placa</label>
-                    <textarea id="plaqueOutput" rows="4" readonly class="w-full bg-black border border-zinc-800 rounded-xl p-3 text-xs font-mono text-emerald-400"></textarea>
-                </div>
-                <div class="flex gap-3 pt-2">
-                    <button type="button" onclick="closePlaqueModal()" class="flex-1 bg-zinc-900 hover:bg-zinc-800 text-zinc-400 py-3 rounded-xl text-xs font-semibold border border-zinc-800">Fechar</button>
-                    <button type="button" onclick="generatePlaqueText()" class="flex-1 bg-red-600 hover:bg-red-700 text-white py-3 rounded-xl text-xs font-bold">Copiar Placa</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
     <!-- TOAST NOTIFICATION -->
     <div id="toast" class="fixed bottom-6 right-6 z-50 bg-[#121212] border border-zinc-800 px-5 py-4 rounded-2xl shadow-2xl transform translate-y-20 opacity-0 transition-all duration-300 flex items-center gap-3">
         <div class="w-2 h-2 rounded-full bg-zinc-300 animate-pulse"></div>
@@ -650,7 +298,7 @@
     <!-- SCRIPTS -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="supabase.js"></script>
-    <script src="rpg.js"></script>
     <script src="auth.js"></script>
+    <script src="rpg.js"></script>
 </body>
 </html>
