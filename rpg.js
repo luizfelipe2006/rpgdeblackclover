@@ -182,6 +182,47 @@ function closeAddUserModal() {
     }
 }
 
+// Helpers com auto-recuperação de erros de colunas faltantes no Supabase
+async function safeInsertProfile(payload) {
+    let copy = { ...payload };
+    let { data, error } = await window.supabaseClient.from('profiles').insert([copy]);
+    
+    let attempts = 0;
+    while (error && error.message && error.message.includes('Could not find the') && attempts < 5) {
+        attempts++;
+        const match = error.message.match(/Could not find the '([^']+)' column/);
+        if (match && match[1]) {
+            delete copy[match[1]];
+            const retry = await window.supabaseClient.from('profiles').insert([copy]);
+            error = retry.error;
+            data = retry.data;
+        } else {
+            break;
+        }
+    }
+    return { data, error };
+}
+
+async function safeUpdateProfile(id, payload) {
+    let copy = { ...payload };
+    let { data, error } = await window.supabaseClient.from('profiles').update(copy).eq('id', id);
+    
+    let attempts = 0;
+    while (error && error.message && error.message.includes('Could not find the') && attempts < 5) {
+        attempts++;
+        const match = error.message.match(/Could not find the '([^']+)' column/);
+        if (match && match[1]) {
+            delete copy[match[1]];
+            const retry = await window.supabaseClient.from('profiles').update(copy).eq('id', id);
+            error = retry.error;
+            data = retry.data;
+        } else {
+            break;
+        }
+    }
+    return { data, error };
+}
+
 async function saveNewUser(e) {
     if (e && e.preventDefault) e.preventDefault();
 
@@ -226,13 +267,7 @@ async function saveNewUser(e) {
         is_admin: isAdmin
     };
 
-    let { error } = await window.supabaseClient.from('profiles').insert([payload]);
-
-    if (error && error.message && error.message.includes('is_admin')) {
-        delete payload.is_admin;
-        const retry = await window.supabaseClient.from('profiles').insert([payload]);
-        error = retry.error;
-    }
+    const { error } = await safeInsertProfile(payload);
 
     if (error) {
         console.error("Erro no Supabase ao inserir:", error);
@@ -305,13 +340,7 @@ async function saveEditedUser(e) {
         is_admin: isAdmin
     };
 
-    let { error } = await window.supabaseClient.from('profiles').update(payload).eq('id', id);
-
-    if (error && error.message && error.message.includes('is_admin')) {
-        delete payload.is_admin;
-        const retry = await window.supabaseClient.from('profiles').update(payload).eq('id', id);
-        error = retry.error;
-    }
+    const { error } = await safeUpdateProfile(id, payload);
 
     if (error) {
         console.error("Erro ao editar perfil:", error);
