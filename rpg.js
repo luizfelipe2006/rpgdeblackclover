@@ -2,6 +2,44 @@ let currentUser = null;
 let cards = [];
 let currentCategoryFilter = 'TODAS';
 
+const rankStatsMap = {
+    'Júnior': { hp: 200, mana: 400, emoji: '☪️' },
+    'Junior': { hp: 200, mana: 400, emoji: '☪️' },
+    'Intermediário': { hp: 300, mana: 600, emoji: '⚜️' },
+    'Intermediario': { hp: 300, mana: 600, emoji: '⚜️' },
+    'Sênior': { hp: 400, mana: 800, emoji: '🔱' },
+    'Senior': { hp: 400, mana: 800, emoji: '🔱' },
+    'Grão Mago': { hp: 800, mana: 1600, emoji: '⚛️' },
+    'Tenente Brilhante': { hp: 500, mana: 1000, emoji: '🥈' },
+    'Vice-capitão': { hp: 500, mana: 1000, emoji: '🃏' },
+    'Comandante Chefe': { hp: 600, mana: 1200, emoji: '🪖' },
+    'Tríade Negra': { hp: 600, mana: 1200, emoji: '🏴‍☠️' },
+    'General Brilhante': { hp: 600, mana: 1200, emoji: '🎖️' },
+    'Capitão': { hp: 600, mana: 1200, emoji: '⚖️' },
+    'Conselheiro': { hp: 700, mana: 1400, emoji: '🕎' },
+    'Rei Mago': { hp: 900, mana: 1800, emoji: '👑' },
+    'Rei': { hp: 1000, mana: 2000, emoji: '🀄' },
+    'Imperador Supremo': { hp: 1100, mana: 2200, emoji: '☦️' }
+};
+
+const databookRules = [
+    "Ilusão não sofre danos de Fugas e Camuflagens.",
+    "Fugas ou Camuflagens com Dano destrói clones, seja eles em defesa ou ataque.",
+    "Caso o usuário esteja com invocação, ou alguma defesa de hp ativa, todos efeitos contínuos (-💔-) sofridos, vão para a invocação.",
+    "Falhas que Falham em 1° e em 2° Falham invocações, Barreiras, o Ataque do Ataque/Defesa.",
+    "Dreno não vai para o usuário, Absorção sim.",
+    "Ataque/Defesa com a mesma quantidade de Mana e Rounds, se usados um em cima do outro se anulam.",
+    "Imunidades e redução não funcionam paralisado.",
+    "Após a Mana do mago zerar, suas imunidades são desativadas.",
+    "Falha de 2 Round's: falha as Magias do Oponente durante dois rounds.",
+    "Cards Imune a Rastreamento se defendem de cards que rastreiam ou causam dano.",
+    "Efeitos de Danos Contínuos: Água (Asfixia), Raio (Queimadura), Fogo (Queimadura), Vento (Hemorragia), Sombra (Hemorragia), Cristal (Hemorragia), Fumaça (Asfixia), Gelo (Hipotermia).",
+    "Invocações seguram todo dano de um card, mesmo o dano sendo maior que a vida da invocação.",
+    "Invocações são imunes a paralisia, mas não ao dano delas.",
+    "Paralisia de 2 Round's concede direito a duas jogadas consecutivas.",
+    "Aumento e Redução de dano no round se aplicam a fugas, camuflagens, barreiras e afins."
+];
+
 const emojiMap = {
     classes: { 'Plebeu': '👨🏻‍🌾', 'Nobre': '🤵🏻', 'Realeza': '🤴🏻' },
     kingdoms: { 'Reino Clover': '🕌', 'Reino Diamond': '🕍', 'Reino Spade': '🏰' },
@@ -26,14 +64,11 @@ const emojiMap = {
 function getEmoji(category, val) {
     if(!val) return '';
     const cleanVal = val.toString().toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-    
     if (!emojiMap[category]) return '';
 
     for (let key in emojiMap[category]) {
         const cleanKey = key.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-        if (cleanVal.includes(cleanKey)) {
-            return emojiMap[category][key];
-        }
+        if (cleanVal.includes(cleanKey)) return emojiMap[category][key];
     }
     return '';
 }
@@ -55,7 +90,7 @@ function toggleMenu() {
 }
 
 function switchTab(tabName) {
-    ['tabWelcome', 'tabProfile', 'tabRealms', 'tabCards', 'tabNotices', 'tabTournaments', 'tabSchedule'].forEach(id => {
+    ['tabWelcome', 'tabProfile', 'tabRealms', 'tabCards', 'tabNotices', 'tabTournaments', 'tabSchedule', 'tabDatabook'].forEach(id => {
         const el = document.getElementById(id);
         if (el) el.classList.add('hidden');
     });
@@ -64,6 +99,7 @@ function switchTab(tabName) {
     if(tabName === 'profile') targetTab = 'tabProfile';
     if(tabName === 'realms') targetTab = 'tabRealms';
     if(tabName === 'cards') targetTab = 'tabCards';
+    if(tabName === 'databook') targetTab = 'tabDatabook';
     if(tabName === 'notices') targetTab = 'tabNotices';
     if(tabName === 'torneios') targetTab = 'tabTournaments';
     if(tabName === 'schedule') targetTab = 'tabSchedule';
@@ -78,6 +114,7 @@ function switchTab(tabName) {
     if(tabName === 'realms') loadRealmsPlayers();
     if(tabName === 'profile') renderProfile();
     if(tabName === 'schedule') loadSchedule();
+    if(tabName === 'databook') renderDatabookRules();
 }
 
 async function renderProfile() {
@@ -91,14 +128,16 @@ async function renderProfile() {
     const rnk = currentUser.rank || 'Júnior';
     const sqd = currentUser.squad || 'Nenhum';
 
+    const stats = rankStatsMap[rnk] || { hp: 200, mana: 400 };
+
     document.getElementById('profNick').textContent = currentUser.nick || '--';
     document.getElementById('profClass').textContent = `${cls} ${getEmoji('classes', cls)}`;
     document.getElementById('profKingdom').textContent = `${kng} ${getEmoji('kingdoms', kng)}`;
     document.getElementById('profHouse').textContent = `${hse} ${getEmoji('houses', hse)}`;
     document.getElementById('profRank').textContent = `${rnk} ${getEmoji('ranks', rnk)}`;
     document.getElementById('profSquad').textContent = `${sqd} ${getEmoji('squads', sqd)}`;
-    document.getElementById('profHp').textContent = (currentUser.hp || 200) + ' ❣️';
-    document.getElementById('profMana').textContent = (currentUser.mana || 400) + ' ♦️';
+    document.getElementById('profHp').textContent = (currentUser.hp || stats.hp) + ' ❣️';
+    document.getElementById('profMana').textContent = (currentUser.mana || stats.mana) + ' ♦️';
 }
 
 async function loadRealmsPlayers() {
@@ -207,18 +246,75 @@ function copyCardText(id) {
 
 function openCardModal() { 
     const modal = document.getElementById('cardModal');
-    if (modal) {
-        modal.classList.remove('hidden'); 
-        modal.classList.add('flex'); 
-    }
+    if (modal) { modal.classList.remove('hidden'); modal.classList.add('flex'); }
 }
 
 function closeCardModal() { 
     const modal = document.getElementById('cardModal');
+    if (modal) { modal.classList.remove('flex'); modal.classList.add('hidden'); }
+}
+
+function openPlaqueModal() {
+    const modal = document.getElementById('plaqueModal');
     if (modal) {
-        modal.classList.remove('flex'); 
-        modal.classList.add('hidden'); 
+        if(currentUser) document.getElementById('plaqueMyNick').value = currentUser.nick || 'Mago';
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
     }
+}
+
+function closePlaqueModal() {
+    const modal = document.getElementById('plaqueModal');
+    if (modal) { modal.classList.remove('flex'); modal.classList.add('hidden'); }
+}
+
+function generatePlaqueText() {
+    const myNick = document.getElementById('plaqueMyNick').value || 'Mago';
+    const oppNick = document.getElementById('plaqueOppNick').value || 'Oponente';
+    const oppRank = document.getElementById('plaqueOppRank').value || 'Júnior';
+
+    const myRank = currentUser ? (currentUser.rank || 'Júnior') : 'Júnior';
+    const myStats = rankStatsMap[myRank] || { hp: 200, mana: 400, emoji: '☪️' };
+    const oppStats = rankStatsMap[oppRank] || { hp: 200, mana: 400, emoji: '☪️' };
+
+    const text = `${myNick} ${myStats.emoji}\n${myStats.hp}←hp❤️ / ${myStats.mana}←Mana♦️\n🆚\n${oppNick} ${oppStats.emoji}\n${oppStats.hp}←hp❤️ / ${oppStats.mana}←Mana♦️`;
+
+    document.getElementById('plaqueOutput').value = text;
+    navigator.clipboard.writeText(text);
+    showToast('Placa Copiada', 'Cole no WhatsApp para iniciar a batalha!');
+}
+
+function renderDatabookRules() {
+    const container = document.getElementById('databookList');
+    if(!container) return;
+    
+    let html = '';
+    databookRules.forEach((rule, idx) => {
+        html += `
+            <div class="bg-black/60 p-4 rounded-xl border border-zinc-800 hover:border-zinc-700 transition-colors">
+                <span class="text-xs font-bold text-purple-400 block mb-1">Regra #${idx + 1}</span>
+                <p class="text-zinc-300 text-xs leading-relaxed">${rule}</p>
+            </div>`;
+    });
+    container.innerHTML = html;
+}
+
+function filterDatabook() {
+    const query = (document.getElementById('databookSearch')?.value || '').toLowerCase();
+    const container = document.getElementById('databookList');
+    if(!container) return;
+
+    let html = '';
+    databookRules.forEach((rule, idx) => {
+        if(rule.toLowerCase().includes(query)) {
+            html += `
+                <div class="bg-black/60 p-4 rounded-xl border border-zinc-800 hover:border-zinc-700 transition-colors">
+                    <span class="text-xs font-bold text-purple-400 block mb-1">Regra #${idx + 1}</span>
+                    <p class="text-zinc-300 text-xs leading-relaxed">${rule}</p>
+                </div>`;
+        }
+    });
+    container.innerHTML = html || '<p class="text-zinc-500 text-xs p-2">Nenhuma regra encontrada com esse termo.</p>';
 }
 
 async function saveCardData(e) {
@@ -255,7 +351,7 @@ async function deleteCard(id) {
 }
 
 async function loadSchedule() {
-    const { data, error } = await window.supabaseClient.from('schedules').select('*').order('created_at', { ascending: false });
+    const { data } = await window.supabaseClient.from('schedules').select('*').order('created_at', { ascending: false });
     const container = document.getElementById('scheduleContainer');
     if (!container) return;
     if (!data || data.length === 0) {
