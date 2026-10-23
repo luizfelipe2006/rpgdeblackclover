@@ -108,6 +108,9 @@
                             <span class="text-[10px] text-zinc-400 uppercase tracking-wider block">Logado como:</span>
                             <span id="menuUserNick" class="text-sm font-bold text-white">Mago</span>
                         </div>
+                        <button id="btnManageUsers" onclick="openUserModal()" class="hidden w-full text-left px-4 py-2.5 text-xs text-red-300 hover:bg-red-950/30 flex items-center gap-2.5 cursor-pointer">
+                            <i class="fa-solid fa-user-plus w-4"></i> Gerenciar usuários
+                        </button>
                         <button onclick="switchTab('profile')" class="w-full text-left px-4 py-2.5 text-xs text-zinc-300 hover:bg-zinc-800/60 flex items-center gap-2.5 cursor-pointer">
                             <i class="fa-solid fa-user text-zinc-400 w-4"></i> Meu Nick e Perfil
                         </button>
@@ -327,6 +330,27 @@
             <h4 id="toastTitle" class="text-xs font-bold text-white">Sucesso</h4>
             <p id="toastSub" class="text-xs text-zinc-400">Ação realizada.</p>
         </div>
+    </div>
+
+    <!-- ADMIN USER MODAL -->
+    <div id="userModal" class="hidden fixed inset-0 z-[60] bg-black/85 backdrop-blur-sm items-center justify-center p-4">
+      <div class="bg-[#121212] border border-zinc-800 rounded-2xl p-5 sm:p-6 w-full max-w-lg shadow-2xl max-h-[90vh] overflow-y-auto">
+        <h3 class="text-lg font-bold text-white mb-5"><i class="fa-solid fa-user-plus text-red-500 mr-2"></i>Cadastrar Novo Mago (Admin)</h3>
+        <form id="createUserForm" onsubmit="createRpgUser(event)" class="space-y-4">
+          <div><label class="block text-xs font-semibold text-zinc-400 uppercase mb-2">Nick / Usuário</label><input id="createNick" required minlength="3" maxlength="40" pattern="[A-Za-zÀ-ÿ0-9_.-]+" class="w-full bg-black border border-zinc-800 rounded-xl px-3 py-2.5 text-white text-sm" /></div>
+          <div><label class="block text-xs font-semibold text-zinc-400 uppercase mb-2">Senha provisória (mín. 8 caracteres)</label><input id="createPassword" type="password" required minlength="8" maxlength="200" autocomplete="new-password" class="w-full bg-black border border-zinc-800 rounded-xl px-3 py-2.5 text-white text-sm" /></div>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div><label class="block text-xs text-zinc-400 uppercase mb-2">Reino</label><select id="createKingdom" class="w-full bg-black border border-zinc-800 rounded-xl px-3 py-2.5 text-white text-sm"><option>Reino Clover</option><option>Reino Diamond</option><option>Reino Spade</option></select></div>
+            <div><label class="block text-xs text-zinc-400 uppercase mb-2">Classe social</label><select id="createClass" class="w-full bg-black border border-zinc-800 rounded-xl px-3 py-2.5 text-white text-sm"><option>Plebeu</option><option>Nobre</option><option>Realeza</option></select></div>
+            <div><label class="block text-xs text-zinc-400 uppercase mb-2">Casa / Família</label><select id="createHouse" class="w-full bg-black border border-zinc-800 rounded-xl px-3 py-2.5 text-white text-sm"><option>Casa Silva</option><option>Casa Vermillion</option><option>Casa Silvamillion</option><option>Casa Voltia</option><option>Casa Faust</option><option>Casa Kruger</option><option>Casa Mars</option><option>Casa Whomalt</option><option>Casa Mariella</option><option>Casa Zogratis</option><option>Casa Grinberryall</option><option>Casa Novachrono</option></select></div>
+            <div><label class="block text-xs text-zinc-400 uppercase mb-2">Esquadrão</label><select id="createSquad" class="w-full bg-black border border-zinc-800 rounded-xl px-3 py-2.5 text-white text-sm"><option>Nenhum</option><option>Alvorecer Dourado</option><option>Touros Negros</option><option>Águias de Prata</option><option>Reis Leões Carmesins</option><option>Rosa Azul</option><option>Louva-a-Deus Verdes</option><option>Pavões Corais</option><option>Orcas Púrpuras</option><option>Cervo Ciano</option><option>Serpente Branca</option></select></div>
+            <div><label class="block text-xs text-zinc-400 uppercase mb-2">Patente</label><select id="createRank" class="w-full bg-black border border-zinc-800 rounded-xl px-3 py-2.5 text-white text-sm"><option>Júnior</option><option>Intermediário</option><option>Sênior</option><option>Grão Mago</option><option>Sub Comandante</option><option>Vice-capitão</option><option>Capitão</option><option>Rei Mago</option></select></div>
+            <div><label class="block text-xs text-zinc-400 uppercase mb-2">É administrador?</label><select id="createIsAdmin" class="w-full bg-black border border-zinc-800 rounded-xl px-3 py-2.5 text-white text-sm"><option value="nao">Não</option><option value="sim">Sim</option></select></div>
+          </div>
+          <p class="text-xs text-zinc-500">O novo jogador deverá trocar a senha no primeiro acesso. Só administradores podem abrir este cadastro.</p>
+          <div class="flex gap-3 pt-2"><button type="button" onclick="closeUserModal()" class="flex-1 bg-zinc-900 border border-zinc-800 text-zinc-300 py-3 rounded-xl text-sm">Cancelar</button><button id="btnCreateUser" type="submit" class="flex-1 bg-red-600 hover:bg-red-700 text-white py-3 rounded-xl text-sm font-bold">Cadastrar Mago</button></div>
+        </form>
+      </div>
     </div>
 
     <!-- SCRIPTS -->
