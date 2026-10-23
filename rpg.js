@@ -82,7 +82,7 @@ function switchTab(tabName) {
 
 async function renderProfile() {
     if(!currentUser) return;
-    const { data } = await window.supabaseClient.from('profiles').select('*').eq('id', currentUser.id).single();
+    const { data } = await window.supabaseClient.from('profiles').select('id,nick,social_class,kingdom,house,rank,squad,hp,mana,first_access,created_at,auth_uid,is_admin').eq('id', currentUser.id).single();
     if(data) currentUser = data;
 
     const cls = currentUser.social_class || 'Plebeu';
