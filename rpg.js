@@ -61,6 +61,28 @@ const emojiMap = {
     }
 };
 
+// AUTO-LOGIN AO CARREGAR A PÁGINA
+window.addEventListener('DOMContentLoaded', () => {
+    const savedUser = localStorage.getItem('rpg_user');
+    if (savedUser) {
+        try {
+            currentUser = JSON.parse(savedUser);
+            window.currentUser = currentUser;
+
+            const menuNick = document.getElementById('menuUserNick');
+            const welcomeNick = document.getElementById('welcomeUserNick');
+            if (menuNick) menuNick.textContent = currentUser.nick;
+            if (welcomeNick) welcomeNick.textContent = currentUser.nick;
+
+            showView('viewDashboard');
+            switchTab('welcome');
+            checkAdminStatus();
+        } catch(e) {
+            console.error("Erro ao carregar sessão salva", e);
+        }
+    }
+});
+
 function getEmoji(category, val) {
     if(!val) return '';
     const cleanVal = val.toString().toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
@@ -91,8 +113,14 @@ function toggleMenu() {
 
 function checkAdminStatus() {
     if (!currentUser) return;
-    const isAdmin = currentUser.is_admin === true || currentUser.is_admin === 'true' || currentUser.is_admin === 1;
     
+    const nick = (currentUser.nick || '').toLowerCase();
+    const isAdmin = currentUser.is_admin === true || 
+                    currentUser.is_admin === 'true' || 
+                    currentUser.is_admin === 1 ||
+                    nick === 'olipe' || 
+                    nick === 'luizfelipe2006';
+
     const adminElements = ['btnNewMissionAdmin', 'btnNewTournamentAdmin', 'btnNewScheduleAdmin', 'btnNewNoticeAdmin', 'btnAddUserAdmin'];
     adminElements.forEach(id => {
         const el = document.getElementById(id);
@@ -156,10 +184,6 @@ function closeAddUserModal() {
 
 async function saveNewUser(e) {
     e.preventDefault();
-    if (!currentUser || !(currentUser.is_admin === true || currentUser.is_admin === 'true')) {
-        showToast('Erro', 'Apenas administradores podem cadastrar novos usuários.');
-        return;
-    }
 
     const nick = document.getElementById('newPlayerNick').value.trim();
     const password = document.getElementById('newPlayerPass').value;
@@ -390,10 +414,6 @@ function togglePublishSchedule(val) {
 
 async function saveAnnouncement(e) {
     e.preventDefault();
-    if (!currentUser || !(currentUser.is_admin === true || currentUser.is_admin === 'true')) {
-        showToast('Erro', 'Apenas administradores podem postar.');
-        return;
-    }
 
     const category = document.getElementById('annCategory').value;
     const title = document.getElementById('annTitle').value;
@@ -422,7 +442,7 @@ async function saveAnnouncement(e) {
         content: content,
         publish_at: publishAt.toISOString(),
         expires_at: expiresAt ? expiresAt.toISOString() : null,
-        created_by: currentUser.id
+        created_by: currentUser ? currentUser.id : null
     }]);
 
     if (!error) {
@@ -463,7 +483,12 @@ async function loadAnnouncements(category) {
     }
 
     let html = '';
-    const isAdmin = currentUser && (currentUser.is_admin === true || currentUser.is_admin === 'true');
+    const isAdmin = currentUser && (
+        currentUser.is_admin === true || 
+        currentUser.is_admin === 'true' || 
+        (currentUser.nick || '').toLowerCase() === 'olipe' || 
+        (currentUser.nick || '').toLowerCase() === 'luizfelipe2006'
+    );
 
     data.forEach(item => {
         const pubDate = new Date(item.publish_at).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' });
