@@ -33,7 +33,7 @@
                 <span class="text-xs tracking-widest text-zinc-400 uppercase font-semibold">SISTEMA OFICIAL</span>
             </div>
             <h1 class="text-4xl sm:text-5xl font-extrabold text-white mb-4 tracking-tight">Seja bem-vindo ao RPG de Black Clover</h1>
-            <p class="text-zinc-400 text-sm sm:text-base mb-8 leading-relaxed">Grimório oficial de batalhas, fichas de magias e controle absoluto dos reinos.</p>
+            <p class="text-zinc-400 text-sm sm:text-base mb-8 leading-relaxed">Grimório oficial de batalhas, fichas de magias, databook de regras e controle dos reinos.</p>
             <button onclick="document.getElementById('viewLanding').classList.add('hidden'); document.getElementById('viewLogin').classList.remove('hidden');" class="bg-red-600 hover:bg-red-700 text-white font-semibold px-8 py-3.5 rounded-xl shadow-lg cursor-pointer transition-all flex items-center gap-2">
                 <i class="fa-solid fa-arrow-right-to-bracket"></i> Entrar
             </button>
@@ -114,17 +114,20 @@
                         <button onclick="switchTab('realms')" class="w-full text-left px-4 py-2.5 text-xs text-zinc-300 hover:bg-zinc-800/60 flex items-center gap-2.5 cursor-pointer">
                             <i class="fa-solid fa-globe text-cyan-400 w-4"></i> Reinos e Magos
                         </button>
-                        <button onclick="switchTab('notices')" class="w-full text-left px-4 py-2.5 text-xs text-zinc-300 hover:bg-zinc-800/60 flex items-center gap-2.5 cursor-pointer">
-                            <i class="fa-solid fa-bullhorn text-amber-400 w-4"></i> Avisos Importantes
-                        </button>
                         <button onclick="switchTab('cards')" class="w-full text-left px-4 py-2.5 text-xs text-zinc-300 hover:bg-zinc-800/60 flex items-center gap-2.5 cursor-pointer">
                             <i class="fa-solid fa-id-card text-emerald-400 w-4"></i> Meus Cards
                         </button>
-                        <button onclick="switchTab('torneios')" class="w-full text-left px-4 py-2.5 text-xs text-zinc-300 hover:bg-zinc-800/60 flex items-center gap-2.5 cursor-pointer">
-                            <i class="fa-solid fa-trophy text-yellow-500 w-4"></i> Torneios e Exames
+                        <button onclick="switchTab('databook')" class="w-full text-left px-4 py-2.5 text-xs text-zinc-300 hover:bg-zinc-800/60 flex items-center gap-2.5 cursor-pointer">
+                            <i class="fa-solid fa-book-bookmark text-purple-400 w-4"></i> Regras & Databook VT
                         </button>
                         <button onclick="switchTab('schedule')" class="w-full text-left px-4 py-2.5 text-xs text-zinc-300 hover:bg-zinc-800/60 flex items-center gap-2.5 cursor-pointer">
                             <i class="fa-solid fa-calendar-days text-blue-400 w-4"></i> Cronograma Mensal
+                        </button>
+                        <button onclick="switchTab('notices')" class="w-full text-left px-4 py-2.5 text-xs text-zinc-300 hover:bg-zinc-800/60 flex items-center gap-2.5 cursor-pointer">
+                            <i class="fa-solid fa-bullhorn text-amber-400 w-4"></i> Avisos Importantes
+                        </button>
+                        <button onclick="switchTab('torneios')" class="w-full text-left px-4 py-2.5 text-xs text-zinc-300 hover:bg-zinc-800/60 flex items-center gap-2.5 cursor-pointer">
+                            <i class="fa-solid fa-trophy text-yellow-500 w-4"></i> Torneios e Exames
                         </button>
                         <div class="border-t border-zinc-800 mt-1 pt-1">
                             <button onclick="handleLogout()" class="w-full text-left px-4 py-2.5 text-xs text-red-400 hover:bg-red-950/30 flex items-center gap-2.5 cursor-pointer">
@@ -141,7 +144,7 @@
                 <p class="text-zinc-400 text-sm mb-8">Gerencie suas magias, consulte os reinos e acompanhe sua evolução no universo de Black Clover.</p>
 
                 <!-- Grid de Atalhos -->
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                     <div onclick="switchTab('cards')" class="bg-black/60 border border-zinc-800 rounded-2xl p-6 cursor-pointer hover:border-zinc-600 transition-all group">
                         <div class="w-12 h-12 rounded-xl bg-emerald-950/40 border border-emerald-800/40 flex items-center justify-center text-emerald-400 text-xl mb-4 group-hover:scale-110 transition-transform">
                             <i class="fa-solid fa-id-card"></i>
@@ -158,12 +161,20 @@
                         <p class="text-zinc-400 text-xs leading-relaxed">Confira a hierarquia dos reinos Clover, Diamond e Spade.</p>
                     </div>
 
-                    <div onclick="switchTab('schedule')" class="bg-black/60 border border-zinc-800 rounded-2xl p-6 cursor-pointer hover:border-zinc-600 transition-all group">
-                        <div class="w-12 h-12 rounded-xl bg-blue-950/40 border border-blue-800/40 flex items-center justify-center text-blue-400 text-xl mb-4 group-hover:scale-110 transition-transform">
-                            <i class="fa-solid fa-calendar-days"></i>
+                    <div onclick="openPlaqueModal()" class="bg-black/60 border border-zinc-800 rounded-2xl p-6 cursor-pointer hover:border-zinc-600 transition-all group">
+                        <div class="w-12 h-12 rounded-xl bg-red-950/40 border border-red-800/40 flex items-center justify-center text-red-400 text-xl mb-4 group-hover:scale-110 transition-transform">
+                            <i class="fa-solid fa-[#121212] fa-swords"></i> ⚔️
                         </div>
-                        <h3 class="font-bold text-white text-lg mb-2">Cronograma Mensal</h3>
-                        <p class="text-zinc-400 text-xs leading-relaxed">Acompanhe as datas das próximas batalhas do mês.</p>
+                        <h3 class="font-bold text-white text-lg mb-2">Placa de Luta</h3>
+                        <p class="text-zinc-400 text-xs leading-relaxed">Gere e copie a placa oficial para duelos no WhatsApp.</p>
+                    </div>
+
+                    <div onclick="switchTab('databook')" class="bg-black/60 border border-zinc-800 rounded-2xl p-6 cursor-pointer hover:border-zinc-600 transition-all group">
+                        <div class="w-12 h-12 rounded-xl bg-purple-950/40 border border-purple-800/40 flex items-center justify-center text-purple-400 text-xl mb-4 group-hover:scale-110 transition-transform">
+                            <i class="fa-solid fa-book-bookmark"></i>
+                        </div>
+                        <h3 class="font-bold text-white text-lg mb-2">Databook VT</h3>
+                        <p class="text-zinc-400 text-xs leading-relaxed">Consulte as 52 regras de combate e efeitos contínuos.</p>
                     </div>
                 </div>
             </div>
@@ -233,6 +244,18 @@
                 <input type="text" id="searchInput" oninput="filterCards()" placeholder="Pesquisar card por texto..." class="w-full bg-black/60 border border-zinc-800 rounded-xl px-4 py-3 text-white text-sm mb-6 focus:outline-none focus:border-zinc-500 transition-colors">
                 <div id="cardsGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"></div>
             </div>
+
+            <!-- ABA REGRAS & DATABOOK VT -->
+            <div id="tabDatabook" class="hidden w-full bg-[#121212]/95 border border-[#262626] rounded-3xl p-8 shadow-2xl backdrop-blur-md">
+                <h2 class="text-xl font-bold text-white mb-2 flex items-center gap-2">
+                    <i class="fa-solid fa-book-bookmark text-purple-400"></i> Databook VT & Regras do WhatsApp
+                </h2>
+                <p class="text-xs text-zinc-400 mb-6">Consulte rapidamente todas as 52 regras oficiais e tabelas de efeitos do combate.</p>
+                
+                <input type="text" id="databookSearch" oninput="filterDatabook()" placeholder="Pesquisar regra (ex: paralisia, dreno, réplica)..." class="w-full bg-black/60 border border-zinc-800 rounded-xl px-4 py-3 text-white text-sm mb-6 focus:outline-none focus:border-purple-500">
+                
+                <div id="databookList" class="space-y-3 max-h-[600px] overflow-y-auto pr-2 no-scrollbar"></div>
+            </div>
             
             <div id="tabNotices" class="hidden w-full bg-[#121212]/95 border border-[#262626] rounded-3xl p-8 shadow-2xl backdrop-blur-md">
                 <h2 class="text-xl font-bold text-white mb-4">Avisos Importantes</h2>
@@ -283,6 +306,43 @@
                     <button type="submit" class="flex-1 bg-zinc-200 hover:bg-white text-black py-3 rounded-xl text-xs font-bold cursor-pointer transition-colors">Salvar Card</button>
                 </div>
             </form>
+        </div>
+    </div>
+
+    <!-- GERADOR DE PLACA MODAL -->
+    <div id="plaqueModal" class="hidden fixed inset-0 z-50 bg-black/85 backdrop-blur-sm flex items-center justify-center p-4">
+        <div class="bg-[#121212] border border-zinc-800 rounded-3xl p-6 w-full max-w-lg shadow-2xl">
+            <h3 class="text-lg font-bold text-white mb-4">Gerar Placa de Luta para WhatsApp</h3>
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-xs font-semibold text-zinc-400 uppercase mb-1">Seu Nick & Elemento</label>
+                    <input type="text" id="plaqueMyNick" class="w-full bg-black border border-zinc-800 rounded-xl px-4 py-2.5 text-white text-sm" placeholder="Ex: Olipe 🔥">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-zinc-400 uppercase mb-1">Nick do Oponente & Elemento</label>
+                    <input type="text" id="plaqueOppNick" class="w-full bg-black border border-zinc-800 rounded-xl px-4 py-2.5 text-white text-sm" placeholder="Ex: Cooper 🌑">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-zinc-400 uppercase mb-1">Patente do Oponente</label>
+                    <select id="plaqueOppRank" class="w-full bg-black border border-zinc-800 rounded-xl px-4 py-2.5 text-white text-sm">
+                        <option value="Júnior">Júnior (200HP / 400MP)</option>
+                        <option value="Intermediário">Intermediário (300HP / 600MP)</option>
+                        <option value="Sênior">Sênior (400HP / 800MP)</option>
+                        <option value="Grão Mago">Grão Mago (800HP / 1600MP)</option>
+                        <option value="Capitão">Capitão (600HP / 1200MP)</option>
+                        <option value="Rei Mago">Rei Mago (900HP / 1800MP)</option>
+                        <option value="Imperador Supremo">Imperador Supremo (1100HP / 2200MP)</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-zinc-400 uppercase mb-1">Prévia da Placa</label>
+                    <textarea id="plaqueOutput" rows="4" readonly class="w-full bg-black border border-zinc-800 rounded-xl p-3 text-xs font-mono text-emerald-400"></textarea>
+                </div>
+                <div class="flex gap-3 pt-2">
+                    <button type="button" onclick="closePlaqueModal()" class="flex-1 bg-zinc-900 hover:bg-zinc-800 text-zinc-400 py-3 rounded-xl text-xs font-semibold border border-zinc-800">Fechar</button>
+                    <button type="button" onclick="generatePlaqueText()" class="flex-1 bg-red-600 hover:bg-red-700 text-white py-3 rounded-xl text-xs font-bold">Copiar Placa</button>
+                </div>
+            </div>
         </div>
     </div>
 
