@@ -22,7 +22,7 @@ async function handleLogin(e) {
 
     try {
         if (!window.supabaseClient) {
-            showLoginError("Erro: Conexão com o banco não inicializada.");
+            showLoginError("Erro: Conexão com o banco de dados não inicializada.");
             return false;
         }
 
@@ -35,10 +35,11 @@ async function handleLogin(e) {
         }
 
         if (data && data.length > 0) {
+            // Procura o utilizador ignorando maiúsculas/minúsculas
             const user = data.find(p => p.nick && p.nick.toLowerCase() === inputNick.toLowerCase());
 
             if (!user) {
-                showLoginError("Usuário não encontrado.");
+                showLoginError("Usuário não encontrado no Grimório.");
                 return false;
             }
 
@@ -47,26 +48,28 @@ async function handleLogin(e) {
                 return false;
             }
 
+            // Define o utilizador logado no sistema
             window.currentUser = user;
-            currentUser = user;
             
-            // Guarda a sessão no navegador
+            // Guarda a sessão no navegador (para não desligar ao atualizar a página)
             localStorage.setItem('rpg_user', JSON.stringify(user));
         } else {
-            showLoginError("Nenhum usuário cadastrado no banco.");
+            showLoginError("Nenhum usuário cadastrado no sistema.");
             return false;
         }
 
+        // Atualiza os nomes no menu
         const menuNick = document.getElementById('menuUserNick');
         const welcomeNick = document.getElementById('welcomeUserNick');
-        if (menuNick) menuNick.textContent = currentUser.nick;
-        if (welcomeNick) welcomeNick.textContent = currentUser.nick;
+        if (menuNick) menuNick.textContent = window.currentUser.nick;
+        if (welcomeNick) welcomeNick.textContent = window.currentUser.nick;
         
         if (typeof checkAdminStatus === 'function') {
             checkAdminStatus();
         }
 
-        if (currentUser.first_access === true) {
+        // Verifica se é o primeiro acesso
+        if (window.currentUser.first_access === true || window.currentUser.first_access === 'true') {
             showView('viewNewPassword');
         } else {
             showView('viewDashboard');
@@ -75,7 +78,7 @@ async function handleLogin(e) {
 
     } catch (err) {
         console.error("Erro interno no login:", err);
-        showLoginError("Falha ao realizar login. Tente novamente.");
+        showLoginError("Falha crítica ao realizar login. Tente novamente.");
     }
 
     return false;
@@ -85,7 +88,7 @@ async function handleNewPassword(e) {
     if (e && e.preventDefault) e.preventDefault();
     const newPassInput = document.getElementById('newPassInput');
     
-    if (!newPassInput || !currentUser) return false;
+    if (!newPassInput || !window.currentUser) return false;
     
     const newPass = newPassInput.value;
 
@@ -95,17 +98,17 @@ async function handleNewPassword(e) {
             password: newPass, 
             first_access: false 
         })
-        .eq('id', currentUser.id);
+        .eq('id', window.currentUser.id);
 
     if (error) {
-        console.error("Erro ao atualizar senha no Supabase:", error);
-        if (typeof showToast === 'function') showToast('Erro', 'Não foi possível atualizar a senha no banco.');
+        console.error("Erro ao atualizar senha:", error);
+        if (typeof showToast === 'function') showToast('Erro', 'Não foi possível atualizar a senha.');
         return false;
     }
     
-    currentUser.password = newPass;
-    currentUser.first_access = false;
-    localStorage.setItem('rpg_user', JSON.stringify(currentUser));
+    window.currentUser.password = newPass;
+    window.currentUser.first_access = false;
+    localStorage.setItem('rpg_user', JSON.stringify(window.currentUser));
 
     if (typeof showToast === 'function') showToast('Sucesso', 'Senha alterada e salva com sucesso!');
     showView('viewDashboard');
@@ -115,7 +118,6 @@ async function handleNewPassword(e) {
 }
 
 function handleLogout() { 
-    currentUser = null; 
     window.currentUser = null;
     localStorage.removeItem('rpg_user');
     showLandingView(); 
