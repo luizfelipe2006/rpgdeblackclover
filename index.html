@@ -342,6 +342,7 @@
           <div class="flex gap-2"><select id="editUserSelect" class="min-w-0 flex-1 bg-black border border-zinc-800 rounded-xl px-3 py-2.5 text-white text-sm"><option value="">➕ Novo mago</option></select><button type="button" onclick="loadSelectedUser()" class="bg-zinc-800 hover:bg-zinc-700 text-white px-4 rounded-xl text-sm">✏️ Editar</button></div>
         </div>
         <form id="createUserForm" onsubmit="createRpgUser(event)" class="space-y-4">
+          <div id="userFormError" class="hidden rounded-xl border border-red-900 bg-red-950/40 text-red-200 p-3 text-sm" role="alert"></div>
           <input id="editingUserId" type="hidden" />
           <div><label class="block text-xs font-semibold text-zinc-400 uppercase mb-2">🧙🏻‍♂️ Nick / Usuário</label><input id="createNick" required minlength="3" maxlength="40" pattern="[A-Za-zÀ-ÿ0-9_.-]+" class="w-full bg-black border border-zinc-800 rounded-xl px-3 py-2.5 text-white text-sm" /></div>
           <div><label class="block text-xs font-semibold text-zinc-400 uppercase mb-2">🔐 Senha provisória (novo usuário) / nova senha (opcional na edição)</label><input id="createPassword" type="password" minlength="8" maxlength="200" autocomplete="new-password" placeholder="Mínimo 8 caracteres" class="w-full bg-black border border-zinc-800 rounded-xl px-3 py-2.5 text-white text-sm" /></div>
