@@ -422,3 +422,346 @@ async function loadRealmsPlayers() {
         const hEmoji = getEmoji('houses', p.house);
         const rEmoji = getEmoji('ranks', p.rank);
         const sEmoji = getEmoji('squads', p.squad);
+
+        const editBtn = isAdmin 
+            ? `<button onclick="openEditUserModal('${p.id}')" class="ml-2 text-zinc-500 hover:text-amber-400 transition-colors p-1" title="Editar Mago"><i class="fa-solid fa-pen-to-square"></i></button>` 
+            : '';
+
+        const item = `
+            <div class="bg-black/60 p-3 rounded-xl border border-zinc-800 mb-2.5 flex items-center justify-between hover:border-zinc-700 transition-colors">
+                <div class="flex items-center gap-1.5">
+                    <span class="font-bold text-white text-xs sm:text-sm">${p.nick || 'Mago'}</span>
+                    ${editBtn}
+                </div>
+                <div class="text-sm space-x-1">
+                    <span title="${p.social_class || ''}">${cEmoji}</span>
+                    <span title="${p.house || ''}">${hEmoji}</span>
+                    <span title="${p.rank || ''}">${rEmoji}</span>
+                    <span title="${p.squad || ''}">${sEmoji}</span>
+                </div>
+            </div>`;
+        
+        if(p.kingdom === 'Reino Diamond') diamondHtml += item;
+        else if(p.kingdom === 'Reino Spade') spadeHtml += item;
+        else cloverHtml += item;
+    });
+
+    document.getElementById('listClover').innerHTML = cloverHtml || '<span class="text-zinc-500 text-xs">Nenhum mago registrado</span>';
+    document.getElementById('listDiamond').innerHTML = diamondHtml || '<span class="text-zinc-500 text-xs">Nenhum mago registrado</span>';
+    document.getElementById('listSpade').innerHTML = spadeHtml || '<span class="text-zinc-500 text-xs">Nenhum mago registrado</span>';
+}
+
+async function loadCards() {
+    if (!currentUser) return;
+    const { data } = await window.supabaseClient.from('cards').select('*').eq('user_id', currentUser.id);
+    cards = data || [];
+    filterCards();
+}
+
+function filterCategory(cat) {
+    currentCategoryFilter = cat;
+    document.querySelectorAll('.pill-btn').forEach(btn => {
+        btn.classList.remove('bg-red-600', 'text-white');
+        btn.classList.add('bg-zinc-900', 'text-zinc-300', 'border', 'border-zinc-800');
+    });
+
+    const activeBtn = document.getElementById(`pill-${cat}`);
+    if (activeBtn) {
+        activeBtn.classList.remove('bg-zinc-900', 'text-zinc-300', 'border', 'border-zinc-800');
+        activeBtn.classList.add('bg-red-600', 'text-white');
+    }
+
+    filterCards();
+}
+
+function filterCards() {
+    const query = (document.getElementById('searchInput')?.value || '').toLowerCase();
+    
+    let filtered = cards;
+    if (currentCategoryFilter !== 'TODAS') {
+        filtered = filtered.filter(c => c.name && c.name.toUpperCase() === currentCategoryFilter.toUpperCase());
+    }
+
+    if (query) {
+        filtered = filtered.filter(c => 
+            (c.name && c.name.toLowerCase().includes(query)) || 
+            (c.text && c.text.toLowerCase().includes(query))
+        );
+    }
+
+    renderCards(filtered);
+}
+
+function renderCards(list) {
+    const grid = document.getElementById('cardsGrid');
+    if(!grid) return;
+    grid.innerHTML = list.length === 0 ? '<p class="text-zinc-500 text-sm col-span-full">Nenhum card encontrado nesta categoria.</p>' : '';
+    list.forEach(c => {
+        grid.innerHTML += `
+            <div class="bg-[#121212] border border-zinc-800 rounded-3xl p-5 flex flex-col justify-between shadow-2xl hover:border-zinc-600 transition-all">
+                <div>
+                    <div class="flex justify-between items-center mb-4">
+                        <span class="bg-zinc-800 text-white text-xs px-3 py-1.5 rounded-lg border border-zinc-700 font-bold uppercase tracking-widest">${c.name}</span>
+                        <button onclick="deleteCard('${c.id}')" class="text-zinc-600 hover:text-red-500 transition-colors cursor-pointer" title="Excluir Card"><i class="fa-solid fa-trash"></i></button>
+                    </div>
+                    <div class="bg-black p-4 rounded-xl text-xs font-mono text-zinc-300 whitespace-pre-wrap border border-zinc-800 leading-relaxed max-h-60 overflow-y-auto">${c.text}</div>
+                </div>
+                <div class="pt-4 mt-4 border-t border-zinc-800">
+                    <button onclick="copyCardText('${c.id}')" class="w-full bg-zinc-200 hover:bg-white text-black py-3 rounded-xl text-xs font-bold cursor-pointer transition-all flex items-center justify-center gap-2">
+                        <i class="fa-regular fa-copy"></i> Copiar seu Card
+                    </button>
+                </div>
+            </div>`;
+    });
+}
+
+function copyCardText(id) {
+    const card = cards.find(c => c.id === id);
+    if (card) {
+        navigator.clipboard.writeText(card.text);
+        showToast('Copiado', 'Card copiado para a área de transferência.');
+    }
+}
+
+function openCardModal() { 
+    const modal = document.getElementById('cardModal');
+    if (modal) { modal.classList.remove('hidden'); modal.classList.add('flex'); }
+}
+
+function closeCardModal() { 
+    const modal = document.getElementById('cardModal');
+    if (modal) { modal.classList.remove('flex'); modal.classList.add('hidden'); }
+}
+
+function openPlaqueModal() {
+    const modal = document.getElementById('plaqueModal');
+    if (modal) {
+        if(currentUser) document.getElementById('plaqueMyNick').value = currentUser.nick || 'Mago';
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+    }
+}
+
+function closePlaqueModal() {
+    const modal = document.getElementById('plaqueModal');
+    if (modal) { modal.classList.remove('flex'); modal.classList.add('hidden'); }
+}
+
+function generatePlaqueText() {
+    const myNick = document.getElementById('plaqueMyNick').value || 'Mago';
+    const oppNick = document.getElementById('plaqueOppNick').value || 'Oponente';
+    const oppRank = document.getElementById('plaqueOppRank').value || 'Júnior';
+
+    const myRank = currentUser ? (currentUser.rank || 'Júnior') : 'Júnior';
+    const myStats = rankStatsMap[myRank] || { hp: 200, mana: 400, emoji: '☪️' };
+    const oppStats = rankStatsMap[oppRank] || { hp: 200, mana: 400, emoji: '☪️' };
+
+    const text = `${myNick} ${myStats.emoji}\n${myStats.hp}←hp❤️ / ${myStats.mana}←Mana♦️\n🆚\n${oppNick} ${oppStats.emoji}\n${oppStats.hp}←hp❤️ / ${oppStats.mana}←Mana♦️`;
+
+    document.getElementById('plaqueOutput').value = text;
+    navigator.clipboard.writeText(text);
+    showToast('Placa Copiada', 'Cole no WhatsApp para iniciar a batalha!');
+}
+
+function openAnnouncementModal(category) {
+    document.getElementById('annCategory').value = category;
+    document.getElementById('annTitle').value = '';
+    document.getElementById('annContent').value = '';
+    document.getElementById('annPublishType').value = 'now';
+    document.getElementById('annDuration').value = 'none';
+    document.getElementById('annScheduleContainer').classList.add('hidden');
+
+    const modal = document.getElementById('announcementModal');
+    if (modal) { modal.classList.remove('hidden'); modal.classList.add('flex'); }
+}
+
+function closeAnnouncementModal() {
+    const modal = document.getElementById('announcementModal');
+    if (modal) { modal.classList.remove('flex'); modal.classList.add('hidden'); }
+}
+
+function togglePublishSchedule(val) {
+    const container = document.getElementById('annScheduleContainer');
+    if (val === 'schedule') container.classList.remove('hidden');
+    else container.classList.add('hidden');
+}
+
+async function saveAnnouncement(e) {
+    e.preventDefault();
+
+    const category = document.getElementById('annCategory').value;
+    const title = document.getElementById('annTitle').value;
+    const content = document.getElementById('annContent').value;
+    const publishType = document.getElementById('annPublishType').value;
+    const duration = document.getElementById('annDuration').value;
+
+    let publishAt = new Date();
+    if (publishType === 'schedule') {
+        const scheduledVal = document.getElementById('annPublishDate').value;
+        if (scheduledVal) publishAt = new Date(scheduledVal);
+    }
+
+    let expiresAt = null;
+    if (duration !== 'none') {
+        expiresAt = new Date(publishAt.getTime());
+        if (duration === '24h') expiresAt.setHours(expiresAt.getHours() + 24);
+        if (duration === '3d') expiresAt.setDate(expiresAt.getDate() + 3);
+        if (duration === '7d') expiresAt.setDate(expiresAt.getDate() + 7);
+        if (duration === '30d') expiresAt.setDate(expiresAt.getDate() + 30);
+    }
+
+    const { error } = await window.supabaseClient.from('announcements').insert([{
+        category: category,
+        title: title,
+        content: content,
+        publish_at: publishAt.toISOString(),
+        expires_at: expiresAt ? expiresAt.toISOString() : null,
+        created_by: currentUser ? currentUser.id : null
+    }]);
+
+    if (!error) {
+        closeAnnouncementModal();
+        loadAnnouncements(category);
+        showToast('Sucesso', 'Comunicado salvo!');
+    } else {
+        console.error(error);
+        showToast('Erro', 'Não foi possível salvar o comunicado.');
+    }
+}
+
+async function loadAnnouncements(category) {
+    const containerMap = {
+        'missions': 'containerMissions',
+        'tournaments': 'containerTournaments',
+        'schedule': 'containerSchedule',
+        'notices': 'containerNotices'
+    };
+
+    const containerId = containerMap[category];
+    const container = document.getElementById(containerId);
+    if (!container) return;
+
+    const nowIso = new Date().toISOString();
+
+    const { data, error } = await window.supabaseClient
+        .from('announcements')
+        .select('*')
+        .eq('category', category)
+        .lte('publish_at', nowIso)
+        .or(`expires_at.is.null,expires_at.gt.${nowIso}`)
+        .order('publish_at', { ascending: false });
+
+    if (error || !data || data.length === 0) {
+        container.innerHTML = '<p class="text-zinc-500 text-xs py-4">Nenhum comunicado ativo nesta seção.</p>';
+        return;
+    }
+
+    let html = '';
+    const isAdmin = currentUser && (
+        currentUser.role === 'admin' ||
+        currentUser.is_admin === true || 
+        currentUser.is_admin === 'true' || 
+        (currentUser.nick || '').toLowerCase() === 'olipe' || 
+        (currentUser.nick || '').toLowerCase() === 'luizfelipe2006'
+    );
+
+    data.forEach(item => {
+        const pubDate = new Date(item.publish_at).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' });
+        const deleteBtn = isAdmin 
+            ? `<button onclick="deleteAnnouncement('${item.id}', '${category}')" class="text-zinc-600 hover:text-red-500 text-xs"><i class="fa-solid fa-trash"></i></button>` 
+            : '';
+
+        html += `
+            <div class="bg-black/60 border border-zinc-800 rounded-2xl p-5 hover:border-zinc-700 transition-colors">
+                <div class="flex justify-between items-center mb-2">
+                    <span class="text-[10px] font-mono bg-zinc-800 text-zinc-400 px-2.5 py-1 rounded-full border border-zinc-700">📅 ${pubDate}</span>
+                    ${deleteBtn}
+                </div>
+                <h3 class="font-bold text-white text-base mb-2">${item.title}</h3>
+                <p class="text-zinc-300 text-xs font-mono whitespace-pre-wrap leading-relaxed">${item.content}</p>
+            </div>`;
+    });
+
+    container.innerHTML = html;
+}
+
+async function deleteAnnouncement(id, category) {
+    await window.supabaseClient.from('announcements').delete().eq('id', id);
+    loadAnnouncements(category);
+    showToast('Removido', 'Comunicado excluído.');
+}
+
+function renderDatabookRules() {
+    const container = document.getElementById('databookList');
+    if(!container) return;
+    
+    let html = '';
+    databookRules.forEach((rule, idx) => {
+        html += `
+            <div class="bg-black/60 p-4 rounded-xl border border-zinc-800 hover:border-zinc-700 transition-colors">
+                <span class="text-xs font-bold text-purple-400 block mb-1">Regra #${idx + 1}</span>
+                <p class="text-zinc-300 text-xs leading-relaxed">${rule}</p>
+            </div>`;
+    });
+    container.innerHTML = html;
+}
+
+function filterDatabook() {
+    const query = (document.getElementById('databookSearch')?.value || '').toLowerCase();
+    const container = document.getElementById('databookList');
+    if(!container) return;
+
+    let html = '';
+    databookRules.forEach((rule, idx) => {
+        if(rule.toLowerCase().includes(query)) {
+            html += `
+                <div class="bg-black/60 p-4 rounded-xl border border-zinc-800 hover:border-zinc-700 transition-colors">
+                    <span class="text-xs font-bold text-purple-400 block mb-1">Regra #${idx + 1}</span>
+                    <p class="text-zinc-300 text-xs leading-relaxed">${rule}</p>
+                </div>`;
+        }
+    });
+    container.innerHTML = html || '<p class="text-zinc-500 text-xs p-2">Nenhuma regra encontrada com esse termo.</p>';
+}
+
+async function saveCardData(e) {
+    e.preventDefault();
+    if(!currentUser) return;
+
+    const typeValue = document.getElementById('cardTypeInput').value;
+    const textValue = document.getElementById('cardTextInput').value;
+
+    const { error } = await window.supabaseClient.from('cards').insert([{
+        user_id: currentUser.id,
+        name: typeValue,
+        damage: '-',
+        mana_cost: '-',
+        usage_limit: '-',
+        text: textValue
+    }]);
+
+    if(!error) {
+        closeCardModal();
+        document.getElementById('cardTypeInput').value = '';
+        document.getElementById('cardTextInput').value = '';
+        loadCards();
+        showToast('Salvo', 'Card colado com sucesso.');
+    } else {
+        showToast('Erro', 'Não foi possível salvar o card.');
+    }
+}
+
+async function deleteCard(id) {
+    await window.supabaseClient.from('cards').delete().eq('id', id);
+    loadCards();
+    showToast('Excluído', 'Card removido.');
+}
+
+function showToast(title, sub) {
+    const t = document.getElementById('toast');
+    if (!t) return;
+    document.getElementById('toastTitle').textContent = title;
+    document.getElementById('toastSub').textContent = sub;
+    t.classList.remove('translate-y-20', 'opacity-0');
+    setTimeout(() => t.classList.add('translate-y-20', 'opacity-0'), 3000);
+}
