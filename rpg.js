@@ -255,27 +255,96 @@ async function deleteCard(id) {
 }
 
 async function loadSchedule() {
+    const btnAdd = document.getElementById('btnAddSchedule');
+    if (btnAdd) {
+        if (currentUser && currentUser.is_admin) {
+            btnAdd.classList.remove('hidden');
+        } else {
+            btnAdd.classList.add('hidden');
+        }
+    }
+
     const { data, error } = await window.supabaseClient.from('schedules').select('*').order('created_at', { ascending: false });
     const container = document.getElementById('scheduleContainer');
     if (!container) return;
+    
     if (!data || data.length === 0) {
         container.innerHTML = '<p class="text-zinc-500 text-sm">Nenhum cronograma cadastrado para este mês.</p>';
         return;
     }
+    
     let html = '';
     data.forEach(item => {
         html += `
-            <div class="bg-black/60 p-4 rounded-2xl border border-zinc-800 mb-3 hover:border-zinc-700 transition-colors">
-                <div class="flex justify-between items-center mb-1">
-                    <span class="text-xs font-bold text-zinc-300 uppercase tracking-wider">${item.month_year}</span>
-                    <span class="bg-zinc-800 text-zinc-300 text-xs px-2.5 py-0.5 rounded-full border border-zinc-700 font-mono">📅 ${item.event_date}</span>
+            <div class="bg-black/60 p-4 rounded-2xl border border-zinc-800 mb-3 hover:border-zinc-700 transition-colors flex justify-between items-start">
+                <div>
+                    <div class="flex items-center gap-2 mb-1">
+                        <span class="text-xs font-bold text-zinc-300 uppercase tracking-wider">${item.month_year}</span>
+                        <span class="bg-zinc-800 text-zinc-300 text-xs px-2.5 py-0.5 rounded-full border border-zinc-700 font-mono">📅 ${item.event_date}</span>
+                    </div>
+                    <h3 class="font-bold text-white text-base mb-1">${item.title}</h3>
+                    <p class="text-zinc-400 text-xs leading-relaxed">${item.description || ''}</p>
                 </div>
-                <h3 class="font-bold text-white text-base mb-1">${item.title}</h3>
-                <p class="text-zinc-400 text-xs leading-relaxed">${item.description || ''}</p>
+                ${currentUser && currentUser.is_admin ? `<button onclick="deleteSchedule('${item.id}')" class="text-zinc-600 hover:text-red-500 transition-colors cursor-pointer p-1" title="Excluir Evento"><i class="fa-solid fa-trash"></i></button>` : ''}
             </div>
         `;
     });
     container.innerHTML = html;
+}
+
+function openScheduleModal() {
+    const modal = document.getElementById('scheduleModal');
+    if (modal) {
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+    }
+}
+
+function closeScheduleModal() {
+    const modal = document.getElementById('scheduleModal');
+    if (modal) {
+        modal.classList.remove('flex');
+        modal.classList.add('hidden');
+    }
+}
+
+async function saveScheduleData(e) {
+    e.preventDefault();
+    if (!currentUser || !currentUser.is_admin) {
+        showToast('Acesso Negado', 'Apenas administradores podem criar eventos.');
+        return;
+    }
+
+    const monthYear = document.getElementById('schMonthInput').value;
+    const eventDate = document.getElementById('schDateInput').value;
+    const title = document.getElementById('schTitleInput').value;
+    const description = document.getElementById('schDescInput').value;
+
+    const { error } = await window.supabaseClient.from('schedules').insert([{
+        month_year: monthYear,
+        event_date: eventDate,
+        title: title,
+        description: description
+    }]);
+
+    if (!error) {
+        closeScheduleModal();
+        document.getElementById('schMonthInput').value = '';
+        document.getElementById('schDateInput').value = '';
+        document.getElementById('schTitleInput').value = '';
+        document.getElementById('schDescInput').value = '';
+        loadSchedule();
+        showToast('Sucesso', 'Evento adicionado ao cronograma!');
+    } else {
+        showToast('Erro', 'Não foi possível salvar o evento.');
+    }
+}
+
+async function deleteSchedule(id) {
+    if (!currentUser || !currentUser.is_admin) return;
+    await window.supabaseClient.from('schedules').delete().eq('id', id);
+    loadSchedule();
+    showToast('Excluído', 'Evento removido do cronograma.');
 }
 
 function showToast(title, sub) {
