@@ -7,13 +7,12 @@ function showLoginError(msg) {
 }
 
 async function handleLogin(e) {
-    if (e && e.preventDefault) e.preventDefault();
-
+    e.preventDefault();
     const nickInput = document.getElementById('loginNick');
     const passInput = document.getElementById('loginPassword');
     const errEl = document.getElementById('loginError');
 
-    if (!nickInput || !passInput) return false;
+    if (!nickInput || !passInput) return;
 
     const inputNick = nickInput.value.trim();
     const pass = passInput.value;
@@ -21,55 +20,35 @@ async function handleLogin(e) {
     if (errEl) errEl.classList.add('hidden');
 
     try {
-        if (!window.supabaseClient) {
-            showLoginError("Erro: Conexão com o banco de dados não inicializada.");
-            return false;
-        }
-
         const { data, error } = await window.supabaseClient.from('profiles').select('*');
 
-        if (error) {
-            console.error("Erro no Supabase:", error);
-            showLoginError("Erro ao consultar o banco de dados.");
-            return false;
-        }
+        if (error) throw error;
 
         if (data && data.length > 0) {
-            // Procura o utilizador ignorando maiúsculas/minúsculas
             const user = data.find(p => p.nick && p.nick.toLowerCase() === inputNick.toLowerCase());
 
             if (!user) {
-                showLoginError("Usuário não encontrado no Grimório.");
-                return false;
+                showLoginError("Usuário não encontrado.");
+                return;
             }
 
             if (user.password !== pass) {
                 showLoginError("Senha incorreta.");
-                return false;
+                return;
             }
 
-            // Define o utilizador logado no sistema
-            window.currentUser = user;
-            
-            // Guarda a sessão no navegador (para não desligar ao atualizar a página)
-            localStorage.setItem('rpg_user', JSON.stringify(user));
+            currentUser = user;
         } else {
-            showLoginError("Nenhum usuário cadastrado no sistema.");
-            return false;
+            showLoginError("Nenhum usuário cadastrado no banco.");
+            return;
         }
 
-        // Atualiza os nomes no menu
         const menuNick = document.getElementById('menuUserNick');
         const welcomeNick = document.getElementById('welcomeUserNick');
-        if (menuNick) menuNick.textContent = window.currentUser.nick;
-        if (welcomeNick) welcomeNick.textContent = window.currentUser.nick;
+        if (menuNick) menuNick.textContent = currentUser.nick;
+        if (welcomeNick) welcomeNick.textContent = currentUser.nick;
         
-        if (typeof checkAdminStatus === 'function') {
-            checkAdminStatus();
-        }
-
-        // Verifica se é o primeiro acesso
-        if (window.currentUser.first_access === true || window.currentUser.first_access === 'true') {
+        if (currentUser.first_access === true) {
             showView('viewNewPassword');
         } else {
             showView('viewDashboard');
@@ -77,18 +56,16 @@ async function handleLogin(e) {
         }
 
     } catch (err) {
-        console.error("Erro interno no login:", err);
-        showLoginError("Falha crítica ao realizar login. Tente novamente.");
+        console.error("Erro na conexão com o servidor:", err);
+        showLoginError("Erro de conexão com o servidor.");
     }
-
-    return false;
 }
 
 async function handleNewPassword(e) {
-    if (e && e.preventDefault) e.preventDefault();
+    e.preventDefault();
     const newPassInput = document.getElementById('newPassInput');
     
-    if (!newPassInput || !window.currentUser) return false;
+    if (!newPassInput || !currentUser) return;
     
     const newPass = newPassInput.value;
 
@@ -98,27 +75,23 @@ async function handleNewPassword(e) {
             password: newPass, 
             first_access: false 
         })
-        .eq('id', window.currentUser.id);
+        .eq('id', currentUser.id);
 
     if (error) {
-        console.error("Erro ao atualizar senha:", error);
-        if (typeof showToast === 'function') showToast('Erro', 'Não foi possível atualizar a senha.');
-        return false;
+        console.error("Erro ao atualizar senha no Supabase:", error);
+        showToast('Erro', 'Não foi possível atualizar a senha no banco.');
+        return;
     }
     
-    window.currentUser.password = newPass;
-    window.currentUser.first_access = false;
-    localStorage.setItem('rpg_user', JSON.stringify(window.currentUser));
+    currentUser.password = newPass;
+    currentUser.first_access = false;
 
-    if (typeof showToast === 'function') showToast('Sucesso', 'Senha alterada e salva com sucesso!');
+    showToast('Sucesso', 'Senha alterada e salva com sucesso!');
     showView('viewDashboard');
     switchTab('welcome');
-
-    return false;
 }
 
 function handleLogout() { 
-    window.currentUser = null;
-    localStorage.removeItem('rpg_user');
+    currentUser = null; 
     showLandingView(); 
 }
