@@ -91,13 +91,14 @@ function toggleMenu() {
 
 function checkAdminStatus() {
     if (!currentUser) return;
-    const isAdmin = currentUser.is_admin === true;
+    const isAdmin = currentUser.is_admin === true || currentUser.is_admin === 'true' || currentUser.is_admin === 1;
     
-    ['btnNewMissionAdmin', 'btnNewTournamentAdmin', 'btnNewScheduleAdmin', 'btnNewNoticeAdmin'].forEach(id => {
-        const btn = document.getElementById(id);
-        if (btn) {
-            if (isAdmin) btn.classList.remove('hidden');
-            else btn.classList.add('hidden');
+    const adminElements = ['btnNewMissionAdmin', 'btnNewTournamentAdmin', 'btnNewScheduleAdmin', 'btnNewNoticeAdmin', 'btnAddUserAdmin'];
+    adminElements.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) {
+            if (isAdmin) el.classList.remove('hidden');
+            else el.classList.add('hidden');
         }
     });
 }
@@ -137,10 +138,70 @@ function switchTab(tabName) {
     if(tabName === 'notices') loadAnnouncements('notices');
 }
 
+function openAddUserModal() {
+    const modal = document.getElementById('addUserModal');
+    if (modal) {
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+    }
+}
+
+function closeAddUserModal() {
+    const modal = document.getElementById('addUserModal');
+    if (modal) {
+        modal.classList.remove('flex');
+        modal.classList.add('hidden');
+    }
+}
+
+async function saveNewUser(e) {
+    e.preventDefault();
+    if (!currentUser || !(currentUser.is_admin === true || currentUser.is_admin === 'true')) {
+        showToast('Erro', 'Apenas administradores podem cadastrar novos usuários.');
+        return;
+    }
+
+    const nick = document.getElementById('newPlayerNick').value.trim();
+    const password = document.getElementById('newPlayerPass').value;
+    const kingdom = document.getElementById('newPlayerKingdom').value;
+    const socialClass = document.getElementById('newPlayerClass').value;
+    const rank = document.getElementById('newPlayerRank').value;
+    const isAdmin = document.getElementById('newPlayerIsAdmin').value === 'true';
+
+    const stats = rankStatsMap[rank] || { hp: 200, mana: 400 };
+
+    const { error } = await window.supabaseClient.from('profiles').insert([{
+        nick: nick,
+        password: password,
+        kingdom: kingdom,
+        social_class: socialClass,
+        rank: rank,
+        hp: stats.hp,
+        mana: stats.mana,
+        first_access: true,
+        is_admin: isAdmin
+    }]);
+
+    if (!error) {
+        closeAddUserModal();
+        document.getElementById('newPlayerNick').value = '';
+        document.getElementById('newPlayerPass').value = '';
+        showToast('Sucesso', `Mago ${nick} cadastrado com sucesso!`);
+        if (document.getElementById('tabRealms') && !document.getElementById('tabRealms').classList.contains('hidden')) {
+            loadRealmsPlayers();
+        }
+    } else {
+        console.error("Erro ao cadastrar usuário:", error);
+        showToast('Erro', 'Não foi possível cadastrar o novo usuário.');
+    }
+}
+
 async function renderProfile() {
     if(!currentUser) return;
     const { data } = await window.supabaseClient.from('profiles').select('*').eq('id', currentUser.id).single();
     if(data) currentUser = data;
+
+    checkAdminStatus();
 
     const cls = currentUser.social_class || 'Plebeu';
     const kng = currentUser.kingdom || 'Reino Clover';
@@ -329,7 +390,7 @@ function togglePublishSchedule(val) {
 
 async function saveAnnouncement(e) {
     e.preventDefault();
-    if (!currentUser || !currentUser.is_admin) {
+    if (!currentUser || !(currentUser.is_admin === true || currentUser.is_admin === 'true')) {
         showToast('Erro', 'Apenas administradores podem postar.');
         return;
     }
@@ -402,9 +463,11 @@ async function loadAnnouncements(category) {
     }
 
     let html = '';
+    const isAdmin = currentUser && (currentUser.is_admin === true || currentUser.is_admin === 'true');
+
     data.forEach(item => {
         const pubDate = new Date(item.publish_at).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' });
-        const deleteBtn = (currentUser && currentUser.is_admin) 
+        const deleteBtn = isAdmin 
             ? `<button onclick="deleteAnnouncement('${item.id}', '${category}')" class="text-zinc-600 hover:text-red-500 text-xs"><i class="fa-solid fa-trash"></i></button>` 
             : '';
 
