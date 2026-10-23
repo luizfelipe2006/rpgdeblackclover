@@ -89,8 +89,21 @@ function toggleMenu() {
     if (menu) menu.classList.toggle('hidden'); 
 }
 
+function checkAdminStatus() {
+    if (!currentUser) return;
+    const isAdmin = currentUser.is_admin === true;
+    
+    ['btnNewMissionAdmin', 'btnNewTournamentAdmin', 'btnNewScheduleAdmin', 'btnNewNoticeAdmin'].forEach(id => {
+        const btn = document.getElementById(id);
+        if (btn) {
+            if (isAdmin) btn.classList.remove('hidden');
+            else btn.classList.add('hidden');
+        }
+    });
+}
+
 function switchTab(tabName) {
-    ['tabWelcome', 'tabProfile', 'tabRealms', 'tabCards', 'tabNotices', 'tabTournaments', 'tabSchedule', 'tabDatabook'].forEach(id => {
+    ['tabWelcome', 'tabProfile', 'tabRealms', 'tabCards', 'tabNotices', 'tabTournaments', 'tabSchedule', 'tabDatabook', 'tabMissions'].forEach(id => {
         const el = document.getElementById(id);
         if (el) el.classList.add('hidden');
     });
@@ -100,6 +113,7 @@ function switchTab(tabName) {
     if(tabName === 'realms') targetTab = 'tabRealms';
     if(tabName === 'cards') targetTab = 'tabCards';
     if(tabName === 'databook') targetTab = 'tabDatabook';
+    if(tabName === 'missions') targetTab = 'tabMissions';
     if(tabName === 'notices') targetTab = 'tabNotices';
     if(tabName === 'torneios') targetTab = 'tabTournaments';
     if(tabName === 'schedule') targetTab = 'tabSchedule';
@@ -110,11 +124,17 @@ function switchTab(tabName) {
     const menu = document.getElementById('dropdownMenu');
     if (menu) menu.classList.add('hidden');
 
+    checkAdminStatus();
+
     if(tabName === 'cards') loadCards();
     if(tabName === 'realms') loadRealmsPlayers();
     if(tabName === 'profile') renderProfile();
-    if(tabName === 'schedule') loadSchedule();
     if(tabName === 'databook') renderDatabookRules();
+
+    if(tabName === 'missions') loadAnnouncements('missions');
+    if(tabName === 'torneios') loadAnnouncements('tournaments');
+    if(tabName === 'schedule') loadAnnouncements('schedule');
+    if(tabName === 'notices') loadAnnouncements('notices');
 }
 
 async function renderProfile() {
@@ -284,6 +304,130 @@ function generatePlaqueText() {
     showToast('Placa Copiada', 'Cole no WhatsApp para iniciar a batalha!');
 }
 
+function openAnnouncementModal(category) {
+    document.getElementById('annCategory').value = category;
+    document.getElementById('annTitle').value = '';
+    document.getElementById('annContent').value = '';
+    document.getElementById('annPublishType').value = 'now';
+    document.getElementById('annDuration').value = 'none';
+    document.getElementById('annScheduleContainer').classList.add('hidden');
+
+    const modal = document.getElementById('announcementModal');
+    if (modal) { modal.classList.remove('hidden'); modal.classList.add('flex'); }
+}
+
+function closeAnnouncementModal() {
+    const modal = document.getElementById('announcementModal');
+    if (modal) { modal.classList.remove('flex'); modal.classList.add('hidden'); }
+}
+
+function togglePublishSchedule(val) {
+    const container = document.getElementById('annScheduleContainer');
+    if (val === 'schedule') container.classList.remove('hidden');
+    else container.classList.add('hidden');
+}
+
+async function saveAnnouncement(e) {
+    e.preventDefault();
+    if (!currentUser || !currentUser.is_admin) {
+        showToast('Erro', 'Apenas administradores podem postar.');
+        return;
+    }
+
+    const category = document.getElementById('annCategory').value;
+    const title = document.getElementById('annTitle').value;
+    const content = document.getElementById('annContent').value;
+    const publishType = document.getElementById('annPublishType').value;
+    const duration = document.getElementById('annDuration').value;
+
+    let publishAt = new Date();
+    if (publishType === 'schedule') {
+        const scheduledVal = document.getElementById('annPublishDate').value;
+        if (scheduledVal) publishAt = new Date(scheduledVal);
+    }
+
+    let expiresAt = null;
+    if (duration !== 'none') {
+        expiresAt = new Date(publishAt.getTime());
+        if (duration === '24h') expiresAt.setHours(expiresAt.getHours() + 24);
+        if (duration === '3d') expiresAt.setDate(expiresAt.getDate() + 3);
+        if (duration === '7d') expiresAt.setDate(expiresAt.getDate() + 7);
+        if (duration === '30d') expiresAt.setDate(expiresAt.getDate() + 30);
+    }
+
+    const { error } = await window.supabaseClient.from('announcements').insert([{
+        category: category,
+        title: title,
+        content: content,
+        publish_at: publishAt.toISOString(),
+        expires_at: expiresAt ? expiresAt.toISOString() : null,
+        created_by: currentUser.id
+    }]);
+
+    if (!error) {
+        closeAnnouncementModal();
+        loadAnnouncements(category);
+        showToast('Sucesso', 'Comunicado salvo!');
+    } else {
+        console.error(error);
+        showToast('Erro', 'Não foi possível salvar o comunicado.');
+    }
+}
+
+async function loadAnnouncements(category) {
+    const containerMap = {
+        'missions': 'containerMissions',
+        'tournaments': 'containerTournaments',
+        'schedule': 'containerSchedule',
+        'notices': 'containerNotices'
+    };
+
+    const containerId = containerMap[category];
+    const container = document.getElementById(containerId);
+    if (!container) return;
+
+    const nowIso = new Date().toISOString();
+
+    const { data, error } = await window.supabaseClient
+        .from('announcements')
+        .select('*')
+        .eq('category', category)
+        .lte('publish_at', nowIso)
+        .or(`expires_at.is.null,expires_at.gt.${nowIso}`)
+        .order('publish_at', { ascending: false });
+
+    if (error || !data || data.length === 0) {
+        container.innerHTML = '<p class="text-zinc-500 text-xs py-4">Nenhum comunicado ativo nesta seção.</p>';
+        return;
+    }
+
+    let html = '';
+    data.forEach(item => {
+        const pubDate = new Date(item.publish_at).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' });
+        const deleteBtn = (currentUser && currentUser.is_admin) 
+            ? `<button onclick="deleteAnnouncement('${item.id}', '${category}')" class="text-zinc-600 hover:text-red-500 text-xs"><i class="fa-solid fa-trash"></i></button>` 
+            : '';
+
+        html += `
+            <div class="bg-black/60 border border-zinc-800 rounded-2xl p-5 hover:border-zinc-700 transition-colors">
+                <div class="flex justify-between items-center mb-2">
+                    <span class="text-[10px] font-mono bg-zinc-800 text-zinc-400 px-2.5 py-1 rounded-full border border-zinc-700">📅 ${pubDate}</span>
+                    ${deleteBtn}
+                </div>
+                <h3 class="font-bold text-white text-base mb-2">${item.title}</h3>
+                <p class="text-zinc-300 text-xs font-mono whitespace-pre-wrap leading-relaxed">${item.content}</p>
+            </div>`;
+    });
+
+    container.innerHTML = html;
+}
+
+async function deleteAnnouncement(id, category) {
+    await window.supabaseClient.from('announcements').delete().eq('id', id);
+    loadAnnouncements(category);
+    showToast('Removido', 'Comunicado excluído.');
+}
+
 function renderDatabookRules() {
     const container = document.getElementById('databookList');
     if(!container) return;
@@ -348,30 +492,6 @@ async function deleteCard(id) {
     await window.supabaseClient.from('cards').delete().eq('id', id);
     loadCards();
     showToast('Excluído', 'Card removido.');
-}
-
-async function loadSchedule() {
-    const { data } = await window.supabaseClient.from('schedules').select('*').order('created_at', { ascending: false });
-    const container = document.getElementById('scheduleContainer');
-    if (!container) return;
-    if (!data || data.length === 0) {
-        container.innerHTML = '<p class="text-zinc-500 text-sm">Nenhum cronograma cadastrado para este mês.</p>';
-        return;
-    }
-    let html = '';
-    data.forEach(item => {
-        html += `
-            <div class="bg-black/60 p-4 rounded-2xl border border-zinc-800 mb-3 hover:border-zinc-700 transition-colors">
-                <div class="flex justify-between items-center mb-1">
-                    <span class="text-xs font-bold text-zinc-300 uppercase tracking-wider">${item.month_year}</span>
-                    <span class="bg-zinc-800 text-zinc-300 text-xs px-2.5 py-0.5 rounded-full border border-zinc-700 font-mono">📅 ${item.event_date}</span>
-                </div>
-                <h3 class="font-bold text-white text-base mb-1">${item.title}</h3>
-                <p class="text-zinc-400 text-xs leading-relaxed">${item.description || ''}</p>
-            </div>
-        `;
-    });
-    container.innerHTML = html;
 }
 
 function showToast(title, sub) {
