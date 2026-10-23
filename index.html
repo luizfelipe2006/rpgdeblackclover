@@ -212,7 +212,7 @@
                     <div class="bg-black/60 p-4 rounded-2xl border border-zinc-800"><span class="text-xs text-zinc-400 uppercase block mb-1">Patente / Cargo</span><span id="profRank" class="text-white font-bold">--</span></div>
                     <div class="bg-black/60 p-4 rounded-2xl border border-zinc-800"><span class="text-xs text-zinc-400 uppercase block mb-1">Classe Social</span><span id="profClass" class="text-white font-bold">--</span></div>
                     <div class="bg-black/60 p-4 rounded-2xl border border-zinc-800"><span class="text-xs text-zinc-400 uppercase block mb-1">Reino</span><span id="profKingdom" class="text-white font-bold">--</span></div>
-                    <div class="bg-black/60 p-4 rounded-2xl border border-zinc-800"><span class="text-xs text-zinc-400 uppercase block mb-1">Casa / Elemento</span><span id="profHouse" class="text-white font-bold">--</span></div>
+                    <div class="bg-black/60 p-4 rounded-2xl border border-zinc-800"><span class="text-xs text-zinc-400 uppercase block mb-1">Casa / Família</span><span id="profHouse" class="text-white font-bold">--</span></div>
                     <div class="bg-black/60 p-4 rounded-2xl border border-zinc-800"><span class="text-xs text-zinc-400 uppercase block mb-1">Esquadrão</span><span id="profSquad" class="text-white font-bold">--</span></div>
                     <div class="bg-black/60 p-4 rounded-2xl border border-zinc-800"><span class="text-xs text-zinc-400 uppercase block mb-1">Vida (HP)</span><span id="profHp" class="text-white font-bold">--</span></div>
                     <div class="bg-black/60 p-4 rounded-2xl border border-zinc-800"><span class="text-xs text-zinc-400 uppercase block mb-1">Mana (MP)</span><span id="profMana" class="text-white font-bold">--</span></div>
@@ -330,7 +330,7 @@
             <h3 class="text-lg font-bold text-white mb-4 flex items-center gap-2">
                 <i class="fa-solid fa-user-plus text-red-500"></i> Cadastrar Novo Mago (Admin)
             </h3>
-            <form onsubmit="saveNewUser(event)" class="space-y-4">
+            <form onsubmit="saveNewUser(event); return false;" class="space-y-4">
                 <div>
                     <label class="block text-xs font-semibold text-zinc-400 uppercase mb-1">Nick / Usuário</label>
                     <input type="text" id="newPlayerNick" required class="w-full bg-black border border-zinc-800 rounded-xl px-4 py-2.5 text-white text-sm focus:outline-none focus:border-red-600">
@@ -359,6 +359,42 @@
                 </div>
                 <div class="grid grid-cols-2 gap-3">
                     <div>
+                        <label class="block text-xs font-semibold text-zinc-400 uppercase mb-1">Casa / Família</label>
+                        <select id="newPlayerHouse" class="w-full bg-black border border-zinc-800 rounded-xl px-3 py-2.5 text-white text-xs">
+                            <option value="Casa Silva">Casa Silva 💧</option>
+                            <option value="Casa Vermillion">Casa Vermillion 🔥</option>
+                            <option value="Casa Silvamillion">Casa Silvamillion 🌪️</option>
+                            <option value="Casa Voltia">Casa Voltia ⚡</option>
+                            <option value="Casa Faust">Casa Faust 🌑</option>
+                            <option value="Casa Kruger">Casa Kruger 🌀</option>
+                            <option value="Casa Mars">Casa Mars 💎</option>
+                            <option value="Casa Whomalt">Casa Whomalt 💨</option>
+                            <option value="Casa Mariella">Casa Mariella ❄️</option>
+                            <option value="Casa Zogratis">Casa Zogratis ☠️</option>
+                            <option value="Casa Grinberryall">Casa Grinberryall 🌟</option>
+                            <option value="Casa Novachrono">Casa Novachrono ⏳</option>
+                            <option value="Nenhuma">Nenhuma ❌</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-zinc-400 uppercase mb-1">Esquadrão</label>
+                        <select id="newPlayerSquad" class="w-full bg-black border border-zinc-800 rounded-xl px-3 py-2.5 text-white text-xs">
+                            <option value="Nenhum">Nenhum ❌</option>
+                            <option value="Alvorecer Dourado">Alvorecer Dourado ☀️</option>
+                            <option value="Touros Negros">Touros Negros 🐃</option>
+                            <option value="Águias de Prata">Águias de Prata 🦅</option>
+                            <option value="Reis Leões Carmesins">Reis Leões Carmesins 🦁</option>
+                            <option value="Rosa Azul">Rosa Azul 🌹</option>
+                            <option value="Louva-a-Deus Verdes">Louva-a-Deus Verdes 🦗</option>
+                            <option value="Pavões Corais">Pavões Corais 🦚</option>
+                            <option value="Orcas Púrpuras">Orcas Púrpuras 🫍</option>
+                            <option value="Cervo Ciano">Cervo Ciano 💠</option>
+                            <option value="Serpente Branca">Serpente Branca 🐍</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
                         <label class="block text-xs font-semibold text-zinc-400 uppercase mb-1">Patente</label>
                         <select id="newPlayerRank" class="w-full bg-black border border-zinc-800 rounded-xl px-3 py-2.5 text-white text-xs">
                             <option value="Júnior">Júnior ☪️</option>
@@ -380,6 +416,104 @@
                 <div class="flex gap-3 pt-2">
                     <button type="button" onclick="closeAddUserModal()" class="flex-1 bg-zinc-900 hover:bg-zinc-800 text-zinc-400 py-3 rounded-xl text-xs font-semibold border border-zinc-800">Cancelar</button>
                     <button type="submit" class="flex-1 bg-red-600 hover:bg-red-700 text-white py-3 rounded-xl text-xs font-bold">Cadastrar Mago</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL EDITAR USUÁRIO (ADMIN) -->
+    <div id="editUserModal" class="hidden fixed inset-0 z-50 bg-black/85 backdrop-blur-sm flex items-center justify-center p-4">
+        <div class="bg-[#121212] border border-zinc-800 rounded-3xl p-6 w-full max-w-lg shadow-2xl max-h-[90vh] overflow-y-auto no-scrollbar">
+            <h3 class="text-lg font-bold text-white mb-4 flex items-center gap-2">
+                <i class="fa-solid fa-user-gear text-amber-500"></i> Editar Mago (Admin)
+            </h3>
+            <form onsubmit="saveEditedUser(event); return false;" class="space-y-4">
+                <input type="hidden" id="editUserId">
+                <div>
+                    <label class="block text-xs font-semibold text-zinc-400 uppercase mb-1">Nick / Usuário</label>
+                    <input type="text" id="editPlayerNick" required class="w-full bg-black border border-zinc-800 rounded-xl px-4 py-2.5 text-white text-sm focus:outline-none focus:border-amber-500">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-zinc-400 uppercase mb-1">Senha</label>
+                    <input type="text" id="editPlayerPass" required class="w-full bg-black border border-zinc-800 rounded-xl px-4 py-2.5 text-white text-sm focus:outline-none focus:border-amber-500">
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-semibold text-zinc-400 uppercase mb-1">Reino</label>
+                        <select id="editPlayerKingdom" class="w-full bg-black border border-zinc-800 rounded-xl px-3 py-2.5 text-white text-xs">
+                            <option value="Reino Clover">Reino Clover 🕌</option>
+                            <option value="Reino Diamond">Reino Diamond 🕍</option>
+                            <option value="Reino Spade">Reino Spade 🏰</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-zinc-400 uppercase mb-1">Classe Social</label>
+                        <select id="editPlayerClass" class="w-full bg-black border border-zinc-800 rounded-xl px-3 py-2.5 text-white text-xs">
+                            <option value="Plebeu">Plebeu 👨🏻‍🌾</option>
+                            <option value="Nobre">Nobre 🤵🏻</option>
+                            <option value="Realeza">Realeza 🤴🏻</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-semibold text-zinc-400 uppercase mb-1">Casa / Família</label>
+                        <select id="editPlayerHouse" class="w-full bg-black border border-zinc-800 rounded-xl px-3 py-2.5 text-white text-xs">
+                            <option value="Casa Silva">Casa Silva 💧</option>
+                            <option value="Casa Vermillion">Casa Vermillion 🔥</option>
+                            <option value="Casa Silvamillion">Casa Silvamillion 🌪️</option>
+                            <option value="Casa Voltia">Casa Voltia ⚡</option>
+                            <option value="Casa Faust">Casa Faust 🌑</option>
+                            <option value="Casa Kruger">Casa Kruger 🌀</option>
+                            <option value="Casa Mars">Casa Mars 💎</option>
+                            <option value="Casa Whomalt">Casa Whomalt 💨</option>
+                            <option value="Casa Mariella">Casa Mariella ❄️</option>
+                            <option value="Casa Zogratis">Casa Zogratis ☠️</option>
+                            <option value="Casa Grinberryall">Casa Grinberryall 🌟</option>
+                            <option value="Casa Novachrono">Casa Novachrono ⏳</option>
+                            <option value="Nenhuma">Nenhuma ❌</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-zinc-400 uppercase mb-1">Esquadrão</label>
+                        <select id="editPlayerSquad" class="w-full bg-black border border-zinc-800 rounded-xl px-3 py-2.5 text-white text-xs">
+                            <option value="Nenhum">Nenhum ❌</option>
+                            <option value="Alvorecer Dourado">Alvorecer Dourado ☀️</option>
+                            <option value="Touros Negros">Touros Negros 🐃</option>
+                            <option value="Águias de Prata">Águias de Prata 🦅</option>
+                            <option value="Reis Leões Carmesins">Reis Leões Carmesins 🦁</option>
+                            <option value="Rosa Azul">Rosa Azul 🌹</option>
+                            <option value="Louva-a-Deus Verdes">Louva-a-Deus Verdes 🦗</option>
+                            <option value="Pavões Corais">Pavões Corais 🦚</option>
+                            <option value="Orcas Púrpuras">Orcas Púrpuras 🫍</option>
+                            <option value="Cervo Ciano">Cervo Ciano 💠</option>
+                            <option value="Serpente Branca">Serpente Branca 🐍</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-semibold text-zinc-400 uppercase mb-1">Patente</label>
+                        <select id="editPlayerRank" class="w-full bg-black border border-zinc-800 rounded-xl px-3 py-2.5 text-white text-xs">
+                            <option value="Júnior">Júnior ☪️</option>
+                            <option value="Intermediário">Intermediário ⚜️</option>
+                            <option value="Sênior">Sênior 🔱</option>
+                            <option value="Grão Mago">Grão Mago ⚛️</option>
+                            <option value="Capitão">Capitão ⚖️</option>
+                            <option value="Rei Mago">Rei Mago 👑</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-zinc-400 uppercase mb-1">É Administrador?</label>
+                        <select id="editPlayerIsAdmin" class="w-full bg-black border border-zinc-800 rounded-xl px-3 py-2.5 text-white text-xs">
+                            <option value="false">Não</option>
+                            <option value="true">Sim</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="flex gap-3 pt-2">
+                    <button type="button" onclick="closeEditUserModal()" class="flex-1 bg-zinc-900 hover:bg-zinc-800 text-zinc-400 py-3 rounded-xl text-xs font-semibold border border-zinc-800">Cancelar</button>
+                    <button type="submit" class="flex-1 bg-amber-600 hover:bg-amber-700 text-white py-3 rounded-xl text-xs font-bold">Salvar Alterações</button>
                 </div>
             </form>
         </div>
