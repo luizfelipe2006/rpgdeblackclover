@@ -13,7 +13,7 @@ async function handleLogin(e) {
     const passInput = document.getElementById('loginPassword');
     const errEl = document.getElementById('loginError');
 
-    if (!nickInput || !passInput) return;
+    if (!nickInput || !passInput) return false;
 
     const inputNick = nickInput.value.trim();
     const pass = passInput.value;
@@ -23,7 +23,7 @@ async function handleLogin(e) {
     try {
         if (!window.supabaseClient) {
             showLoginError("Erro: Conexão com o banco não inicializada.");
-            return;
+            return false;
         }
 
         const { data, error } = await window.supabaseClient.from('profiles').select('*');
@@ -31,7 +31,7 @@ async function handleLogin(e) {
         if (error) {
             console.error("Erro no Supabase:", error);
             showLoginError("Erro ao consultar o banco de dados.");
-            return;
+            return false;
         }
 
         if (data && data.length > 0) {
@@ -39,19 +39,19 @@ async function handleLogin(e) {
 
             if (!user) {
                 showLoginError("Usuário não encontrado.");
-                return;
+                return false;
             }
 
             if (user.password !== pass) {
                 showLoginError("Senha incorreta.");
-                return;
+                return false;
             }
 
             window.currentUser = user;
             currentUser = user;
         } else {
             showLoginError("Nenhum usuário cadastrado no banco.");
-            return;
+            return false;
         }
 
         const menuNick = document.getElementById('menuUserNick');
@@ -74,13 +74,15 @@ async function handleLogin(e) {
         console.error("Erro interno no login:", err);
         showLoginError("Falha ao realizar login. Tente novamente.");
     }
+
+    return false;
 }
 
 async function handleNewPassword(e) {
     if (e && e.preventDefault) e.preventDefault();
     const newPassInput = document.getElementById('newPassInput');
     
-    if (!newPassInput || !currentUser) return;
+    if (!newPassInput || !currentUser) return false;
     
     const newPass = newPassInput.value;
 
@@ -94,16 +96,18 @@ async function handleNewPassword(e) {
 
     if (error) {
         console.error("Erro ao atualizar senha no Supabase:", error);
-        showToast('Erro', 'Não foi possível atualizar a senha no banco.');
-        return;
+        if (typeof showToast === 'function') showToast('Erro', 'Não foi possível atualizar a senha no banco.');
+        return false;
     }
     
     currentUser.password = newPass;
     currentUser.first_access = false;
 
-    showToast('Sucesso', 'Senha alterada e salva com sucesso!');
+    if (typeof showToast === 'function') showToast('Sucesso', 'Senha alterada e salva com sucesso!');
     showView('viewDashboard');
     switchTab('welcome');
+
+    return false;
 }
 
 function handleLogout() { 
