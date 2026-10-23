@@ -7,7 +7,8 @@ function showLoginError(msg) {
 }
 
 async function handleLogin(e) {
-    e.preventDefault();
+    if (e && e.preventDefault) e.preventDefault();
+
     const nickInput = document.getElementById('loginNick');
     const passInput = document.getElementById('loginPassword');
     const errEl = document.getElementById('loginError');
@@ -20,9 +21,18 @@ async function handleLogin(e) {
     if (errEl) errEl.classList.add('hidden');
 
     try {
+        if (!window.supabaseClient) {
+            showLoginError("Erro: Conexão com o banco não inicializada.");
+            return;
+        }
+
         const { data, error } = await window.supabaseClient.from('profiles').select('*');
 
-        if (error) throw error;
+        if (error) {
+            console.error("Erro no Supabase:", error);
+            showLoginError("Erro ao consultar o banco de dados.");
+            return;
+        }
 
         if (data && data.length > 0) {
             const user = data.find(p => p.nick && p.nick.toLowerCase() === inputNick.toLowerCase());
@@ -37,6 +47,7 @@ async function handleLogin(e) {
                 return;
             }
 
+            window.currentUser = user;
             currentUser = user;
         } else {
             showLoginError("Nenhum usuário cadastrado no banco.");
@@ -48,7 +59,9 @@ async function handleLogin(e) {
         if (menuNick) menuNick.textContent = currentUser.nick;
         if (welcomeNick) welcomeNick.textContent = currentUser.nick;
         
-        checkAdminStatus();
+        if (typeof checkAdminStatus === 'function') {
+            checkAdminStatus();
+        }
 
         if (currentUser.first_access === true) {
             showView('viewNewPassword');
@@ -58,13 +71,13 @@ async function handleLogin(e) {
         }
 
     } catch (err) {
-        console.error("Erro na conexão com o servidor:", err);
-        showLoginError("Erro de conexão com o servidor.");
+        console.error("Erro interno no login:", err);
+        showLoginError("Falha ao realizar login. Tente novamente.");
     }
 }
 
 async function handleNewPassword(e) {
-    e.preventDefault();
+    if (e && e.preventDefault) e.preventDefault();
     const newPassInput = document.getElementById('newPassInput');
     
     if (!newPassInput || !currentUser) return;
@@ -95,5 +108,6 @@ async function handleNewPassword(e) {
 
 function handleLogout() { 
     currentUser = null; 
+    window.currentUser = null;
     showLandingView(); 
 }
