@@ -1,5 +1,6 @@
 let currentUser = null;
 let cards = [];
+let allProfilesList = [];
 let currentCategoryFilter = 'TODAS';
 
 const rankStatsMap = {
@@ -183,40 +184,162 @@ function closeAddUserModal() {
 }
 
 async function saveNewUser(e) {
-    e.preventDefault();
+    if (e && e.preventDefault) e.preventDefault();
 
-    const nick = document.getElementById('newPlayerNick').value.trim();
-    const password = document.getElementById('newPlayerPass').value;
-    const kingdom = document.getElementById('newPlayerKingdom').value;
-    const socialClass = document.getElementById('newPlayerClass').value;
-    const rank = document.getElementById('newPlayerRank').value;
-    const isAdmin = document.getElementById('newPlayerIsAdmin').value === 'true';
+    const nickInput = document.getElementById('newPlayerNick');
+    const passInput = document.getElementById('newPlayerPass');
+    const kingdomInput = document.getElementById('newPlayerKingdom');
+    const classInput = document.getElementById('newPlayerClass');
+    const houseInput = document.getElementById('newPlayerHouse');
+    const squadInput = document.getElementById('newPlayerSquad');
+    const rankInput = document.getElementById('newPlayerRank');
+    const adminInput = document.getElementById('newPlayerIsAdmin');
+
+    if (!nickInput || !passInput) return;
+
+    const nick = nickInput.value.trim();
+    const password = passInput.value;
+    const kingdom = kingdomInput ? kingdomInput.value : 'Reino Clover';
+    const socialClass = classInput ? classInput.value : 'Plebeu';
+    const house = houseInput ? houseInput.value : 'Casa Silva';
+    const squad = squadInput ? squadInput.value : 'Nenhum';
+    const rank = rankInput ? rankInput.value : 'Júnior';
+    const isAdmin = adminInput ? (adminInput.value === 'true') : false;
+
+    if (!nick || !password) {
+        showToast('Erro', 'Preencha o Nick e a Senha.');
+        return;
+    }
 
     const stats = rankStatsMap[rank] || { hp: 200, mana: 400 };
 
-    const { error } = await window.supabaseClient.from('profiles').insert([{
-        nick: nick,
-        password: password,
-        kingdom: kingdom,
-        social_class: socialClass,
-        rank: rank,
-        hp: stats.hp,
-        mana: stats.mana,
-        first_access: true,
-        is_admin: isAdmin
-    }]);
+    try {
+        const { error } = await window.supabaseClient
+            .from('profiles')
+            .insert([{
+                nick: nick,
+                password: password,
+                kingdom: kingdom,
+                social_class: socialClass,
+                house: house,
+                squad: squad,
+                rank: rank,
+                hp: stats.hp,
+                mana: stats.mana,
+                first_access: true,
+                is_admin: isAdmin
+            }]);
 
-    if (!error) {
-        closeAddUserModal();
-        document.getElementById('newPlayerNick').value = '';
-        document.getElementById('newPlayerPass').value = '';
-        showToast('Sucesso', `Mago ${nick} cadastrado com sucesso!`);
-        if (document.getElementById('tabRealms') && !document.getElementById('tabRealms').classList.contains('hidden')) {
+        if (error) {
+            console.error("Erro no Supabase ao inserir:", error);
+            showToast('Erro ao cadastrar', error.message || 'Erro ao comunicar com o banco.');
+        } else {
+            closeAddUserModal();
+            nickInput.value = '';
+            passInput.value = '';
+            showToast('Sucesso', `Mago ${nick} cadastrado com sucesso!`);
+            if (typeof loadRealmsPlayers === 'function') {
+                loadRealmsPlayers();
+            }
+        }
+    } catch (err) {
+        console.error("Erro interno no cadastro:", err);
+        showToast('Erro Interno', err.message || 'Falha ao processar o formulário.');
+    }
+}
+
+function openEditUserModal(userId) {
+    const user = allProfilesList.find(p => p.id === userId);
+    if (!user) return;
+
+    document.getElementById('editUserId').value = user.id;
+    document.getElementById('editPlayerNick').value = user.nick || '';
+    document.getElementById('editPlayerPass').value = user.password || '';
+    document.getElementById('editPlayerKingdom').value = user.kingdom || 'Reino Clover';
+    document.getElementById('editPlayerClass').value = user.social_class || 'Plebeu';
+    document.getElementById('editPlayerHouse').value = user.house || 'Casa Silva';
+    document.getElementById('editPlayerSquad').value = user.squad || 'Nenhum';
+    document.getElementById('editPlayerRank').value = user.rank || 'Júnior';
+    document.getElementById('editPlayerIsAdmin').value = (user.is_admin === true || user.is_admin === 'true') ? 'true' : 'false';
+
+    const modal = document.getElementById('editUserModal');
+    if (modal) {
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+    }
+}
+
+function closeEditUserModal() {
+    const modal = document.getElementById('editUserModal');
+    if (modal) {
+        modal.classList.remove('flex');
+        modal.classList.add('hidden');
+    }
+}
+
+async function saveEditedUser(e) {
+    if (e && e.preventDefault) e.preventDefault();
+
+    const id = document.getElementById('editUserId').value;
+    const nick = document.getElementById('editPlayerNick').value.trim();
+    const password = document.getElementById('editPlayerPass').value;
+    const kingdom = document.getElementById('editPlayerKingdom').value;
+    const socialClass = document.getElementById('editPlayerClass').value;
+    const house = document.getElementById('editPlayerHouse').value;
+    const squad = document.getElementById('editPlayerSquad').value;
+    const rank = document.getElementById('editPlayerRank').value;
+    const isAdmin = document.getElementById('editPlayerIsAdmin').value === 'true';
+
+    const stats = rankStatsMap[rank] || { hp: 200, mana: 400 };
+
+    try {
+        const { error } = await window.supabaseClient
+            .from('profiles')
+            .update({
+                nick: nick,
+                password: password,
+                kingdom: kingdom,
+                social_class: socialClass,
+                house: house,
+                squad: squad,
+                rank: rank,
+                hp: stats.hp,
+                mana: stats.mana,
+                is_admin: isAdmin
+            })
+            .eq('id', id);
+
+        if (error) {
+            console.error("Erro ao editar perfil:", error);
+            showToast('Erro', error.message || 'Não foi possível atualizar o mago.');
+        } else {
+            closeEditUserModal();
+            showToast('Sucesso', `Mago ${nick} atualizado com sucesso!`);
+            
+            if (currentUser && currentUser.id === id) {
+                currentUser.nick = nick;
+                currentUser.password = password;
+                currentUser.kingdom = kingdom;
+                currentUser.social_class = socialClass;
+                currentUser.house = house;
+                currentUser.squad = squad;
+                currentUser.rank = rank;
+                currentUser.hp = stats.hp;
+                currentUser.mana = stats.mana;
+                currentUser.is_admin = isAdmin;
+                localStorage.setItem('rpg_user', JSON.stringify(currentUser));
+                
+                const menuNick = document.getElementById('menuUserNick');
+                const welcomeNick = document.getElementById('welcomeUserNick');
+                if (menuNick) menuNick.textContent = nick;
+                if (welcomeNick) welcomeNick.textContent = nick;
+            }
+
             loadRealmsPlayers();
         }
-    } else {
-        console.error("Erro ao cadastrar usuário:", error);
-        showToast('Erro', 'Não foi possível cadastrar o novo usuário.');
+    } catch (err) {
+        console.error("Erro interno ao editar:", err);
+        showToast('Erro', 'Falha ao salvar as alterações.');
     }
 }
 
@@ -246,8 +369,17 @@ async function renderProfile() {
 }
 
 async function loadRealmsPlayers() {
-    const { data } = await window.supabaseClient.from('profiles').select('nick, kingdom, squad, rank, social_class, house');
+    const { data } = await window.supabaseClient.from('profiles').select('*');
     if(!data) return;
+    allProfilesList = data;
+
+    const isAdmin = currentUser && (
+        currentUser.is_admin === true || 
+        currentUser.is_admin === 'true' || 
+        currentUser.is_admin === 1 || 
+        (currentUser.nick || '').toLowerCase() === 'olipe' || 
+        (currentUser.nick || '').toLowerCase() === 'luizfelipe2006'
+    );
 
     let cloverHtml = '', diamondHtml = '', spadeHtml = '';
     data.forEach(p => {
@@ -256,14 +388,21 @@ async function loadRealmsPlayers() {
         const rEmoji = getEmoji('ranks', p.rank);
         const sEmoji = getEmoji('squads', p.squad);
 
+        const editBtn = isAdmin 
+            ? `<button onclick="openEditUserModal('${p.id}')" class="ml-2 text-zinc-500 hover:text-amber-400 transition-colors p-1" title="Editar Mago"><i class="fa-solid fa-pen-to-square"></i></button>` 
+            : '';
+
         const item = `
             <div class="bg-black/60 p-3 rounded-xl border border-zinc-800 mb-2.5 flex items-center justify-between hover:border-zinc-700 transition-colors">
-                <span class="font-bold text-white">${p.nick || 'Mago'}</span>
+                <div class="flex items-center gap-1.5">
+                    <span class="font-bold text-white text-xs sm:text-sm">${p.nick || 'Mago'}</span>
+                    ${editBtn}
+                </div>
                 <div class="text-sm space-x-1">
-                    <span>${cEmoji}</span>
-                    <span>${hEmoji}</span>
-                    <span>${rEmoji}</span>
-                    <span>${sEmoji}</span>
+                    <span title="${p.social_class || ''}">${cEmoji}</span>
+                    <span title="${p.house || ''}">${hEmoji}</span>
+                    <span title="${p.rank || ''}">${rEmoji}</span>
+                    <span title="${p.squad || ''}">${sEmoji}</span>
                 </div>
             </div>`;
         
