@@ -171,6 +171,8 @@ async function createRpgUser(e) {
     rank: value("createRank"),
     is_admin: value("createIsAdmin") === "sim"
   };
+  const errBox = document.getElementById("userFormError");
+  if (errBox) { errBox.textContent = ""; errBox.classList.add("hidden"); }
   if (button) button.disabled = true;
   try {
     const session = (await window.supabaseClient.auth.getSession()).data.session;
@@ -188,6 +190,8 @@ async function createRpgUser(e) {
   } catch (err) {
     console.error("Erro ao salvar usuário:", err);
     showToast("⚠️ Erro ao salvar", err.message || "Não foi possível salvar o usuário.");
+    const errBox = document.getElementById("userFormError");
+    if (errBox) { errBox.textContent = "⚠️ " + (err.message || "Não foi possível salvar o usuário."); errBox.classList.remove("hidden"); }
   } finally {
     if (button) button.disabled = false;
   }
