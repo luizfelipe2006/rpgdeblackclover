@@ -96,46 +96,52 @@
                     </div>
                 </div>
 
-                <!-- Botão do Menu / Três Pontinhos -->
-                <div class="relative">
-                    <button onclick="toggleMenu()" class="w-10 h-10 rounded-xl bg-black border border-zinc-800 hover:border-zinc-700 text-zinc-300 flex items-center justify-center cursor-pointer transition-colors shadow-md">
-                        <i class="fa-solid fa-ellipsis-vertical"></i>
+                <!-- Botão de Criar Usuário (Admin) e Botão dos Três Pontinhos -->
+                <div class="flex items-center gap-3">
+                    <button id="btnAddUserAdmin" onclick="openAddUserModal()" class="hidden bg-red-600 hover:bg-red-700 text-white px-3.5 py-2 rounded-xl text-xs font-bold cursor-pointer transition-all flex items-center gap-2 shadow-md">
+                        <i class="fa-solid fa-user-plus"></i> <span class="hidden sm:inline">Novo Mago</span>
                     </button>
 
-                    <!-- Dropdown Menu -->
-                    <div id="dropdownMenu" class="hidden absolute right-0 mt-2 w-64 bg-[#121212] border border-zinc-800 rounded-2xl shadow-2xl py-2 z-50">
-                        <div class="px-4 py-2 border-b border-zinc-800 mb-1">
-                            <span class="text-[10px] text-zinc-400 uppercase tracking-wider block">Logado como:</span>
-                            <span id="menuUserNick" class="text-sm font-bold text-white">Mago</span>
-                        </div>
-                        <button onclick="switchTab('profile')" class="w-full text-left px-4 py-2.5 text-xs text-zinc-300 hover:bg-zinc-800/60 flex items-center gap-2.5 cursor-pointer">
-                            <i class="fa-solid fa-user text-zinc-400 w-4"></i> Meu Nick e Perfil
+                    <div class="relative">
+                        <button onclick="toggleMenu()" class="w-10 h-10 rounded-xl bg-black border border-zinc-800 hover:border-zinc-700 text-zinc-300 flex items-center justify-center cursor-pointer transition-colors shadow-md">
+                            <i class="fa-solid fa-ellipsis-vertical"></i>
                         </button>
-                        <button onclick="switchTab('realms')" class="w-full text-left px-4 py-2.5 text-xs text-zinc-300 hover:bg-zinc-800/60 flex items-center gap-2.5 cursor-pointer">
-                            <i class="fa-solid fa-globe text-cyan-400 w-4"></i> Reinos e Magos
-                        </button>
-                        <button onclick="switchTab('cards')" class="w-full text-left px-4 py-2.5 text-xs text-zinc-300 hover:bg-zinc-800/60 flex items-center gap-2.5 cursor-pointer">
-                            <i class="fa-solid fa-id-card text-emerald-400 w-4"></i> Meus Cards
-                        </button>
-                        <button onclick="switchTab('missions')" class="w-full text-left px-4 py-2.5 text-xs text-zinc-300 hover:bg-zinc-800/60 flex items-center gap-2.5 cursor-pointer">
-                            <i class="fa-solid fa-scroll text-red-400 w-4"></i> Missões
-                        </button>
-                        <button onclick="switchTab('databook')" class="w-full text-left px-4 py-2.5 text-xs text-zinc-300 hover:bg-zinc-800/60 flex items-center gap-2.5 cursor-pointer">
-                            <i class="fa-solid fa-book-bookmark text-purple-400 w-4"></i> Regras & Databook VT
-                        </button>
-                        <button onclick="switchTab('schedule')" class="w-full text-left px-4 py-2.5 text-xs text-zinc-300 hover:bg-zinc-800/60 flex items-center gap-2.5 cursor-pointer">
-                            <i class="fa-solid fa-calendar-days text-blue-400 w-4"></i> Cronograma Mensal
-                        </button>
-                        <button onclick="switchTab('notices')" class="w-full text-left px-4 py-2.5 text-xs text-zinc-300 hover:bg-zinc-800/60 flex items-center gap-2.5 cursor-pointer">
-                            <i class="fa-solid fa-bullhorn text-amber-400 w-4"></i> Avisos Importantes
-                        </button>
-                        <button onclick="switchTab('torneios')" class="w-full text-left px-4 py-2.5 text-xs text-zinc-300 hover:bg-zinc-800/60 flex items-center gap-2.5 cursor-pointer">
-                            <i class="fa-solid fa-trophy text-yellow-500 w-4"></i> Torneios e Exames
-                        </button>
-                        <div class="border-t border-zinc-800 mt-1 pt-1">
-                            <button onclick="handleLogout()" class="w-full text-left px-4 py-2.5 text-xs text-red-400 hover:bg-red-950/30 flex items-center gap-2.5 cursor-pointer">
-                                <i class="fa-solid fa-arrow-right-from-bracket w-4"></i> Sair da Conta
+
+                        <!-- Dropdown Menu -->
+                        <div id="dropdownMenu" class="hidden absolute right-0 mt-2 w-64 bg-[#121212] border border-zinc-800 rounded-2xl shadow-2xl py-2 z-50">
+                            <div class="px-4 py-2 border-b border-zinc-800 mb-1">
+                                <span class="text-[10px] text-zinc-400 uppercase tracking-wider block">Logado como:</span>
+                                <span id="menuUserNick" class="text-sm font-bold text-white">Mago</span>
+                            </div>
+                            <button onclick="switchTab('profile')" class="w-full text-left px-4 py-2.5 text-xs text-zinc-300 hover:bg-zinc-800/60 flex items-center gap-2.5 cursor-pointer">
+                                <i class="fa-solid fa-user text-zinc-400 w-4"></i> Meu Nick e Perfil
                             </button>
+                            <button onclick="switchTab('realms')" class="w-full text-left px-4 py-2.5 text-xs text-zinc-300 hover:bg-zinc-800/60 flex items-center gap-2.5 cursor-pointer">
+                                <i class="fa-solid fa-globe text-cyan-400 w-4"></i> Reinos e Magos
+                            </button>
+                            <button onclick="switchTab('cards')" class="w-full text-left px-4 py-2.5 text-xs text-zinc-300 hover:bg-zinc-800/60 flex items-center gap-2.5 cursor-pointer">
+                                <i class="fa-solid fa-id-card text-emerald-400 w-4"></i> Meus Cards
+                            </button>
+                            <button onclick="switchTab('missions')" class="w-full text-left px-4 py-2.5 text-xs text-zinc-300 hover:bg-zinc-800/60 flex items-center gap-2.5 cursor-pointer">
+                                <i class="fa-solid fa-scroll text-red-400 w-4"></i> Missões
+                            </button>
+                            <button onclick="switchTab('databook')" class="w-full text-left px-4 py-2.5 text-xs text-zinc-300 hover:bg-zinc-800/60 flex items-center gap-2.5 cursor-pointer">
+                                <i class="fa-solid fa-book-bookmark text-purple-400 w-4"></i> Regras & Databook VT
+                            </button>
+                            <button onclick="switchTab('schedule')" class="w-full text-left px-4 py-2.5 text-xs text-zinc-300 hover:bg-zinc-800/60 flex items-center gap-2.5 cursor-pointer">
+                                <i class="fa-solid fa-calendar-days text-blue-400 w-4"></i> Cronograma Mensal
+                            </button>
+                            <button onclick="switchTab('notices')" class="w-full text-left px-4 py-2.5 text-xs text-zinc-300 hover:bg-zinc-800/60 flex items-center gap-2.5 cursor-pointer">
+                                <i class="fa-solid fa-bullhorn text-amber-400 w-4"></i> Avisos Importantes
+                            </button>
+                            <button onclick="switchTab('torneios')" class="w-full text-left px-4 py-2.5 text-xs text-zinc-300 hover:bg-zinc-800/60 flex items-center gap-2.5 cursor-pointer">
+                                <i class="fa-solid fa-trophy text-yellow-500 w-4"></i> Torneios e Exames
+                            </button>
+                            <div class="border-t border-zinc-800 mt-1 pt-1">
+                                <button onclick="handleLogout()" class="w-full text-left px-4 py-2.5 text-xs text-red-400 hover:bg-red-950/30 flex items-center gap-2.5 cursor-pointer">
+                                    <i class="fa-solid fa-arrow-right-from-bracket w-4"></i> Sair da Conta
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -232,7 +238,6 @@
                     </button>
                 </div>
 
-                <!-- Barra de Pílulas de Categoria -->
                 <div class="flex items-center gap-2 overflow-x-auto no-scrollbar mb-6 pb-2">
                     <button onclick="filterCategory('TODAS')" id="pill-TODAS" class="pill-btn active bg-red-600 text-white px-4 py-2 rounded-full text-xs font-bold whitespace-nowrap cursor-pointer transition-all flex items-center gap-2">
                         <i class="fa-solid fa-graduation-cap"></i> Todas
@@ -318,6 +323,67 @@
     <footer class="relative z-10 text-center py-4 text-xs text-zinc-500 border-t border-zinc-900">
         RPG de Black Clover • Sistema Integrado com Supabase
     </footer>
+
+    <!-- MODAL CADASTRAR NOVO USUÁRIO (ADMIN) -->
+    <div id="addUserModal" class="hidden fixed inset-0 z-50 bg-black/85 backdrop-blur-sm flex items-center justify-center p-4">
+        <div class="bg-[#121212] border border-zinc-800 rounded-3xl p-6 w-full max-w-lg shadow-2xl max-h-[90vh] overflow-y-auto no-scrollbar">
+            <h3 class="text-lg font-bold text-white mb-4 flex items-center gap-2">
+                <i class="fa-solid fa-user-plus text-red-500"></i> Cadastrar Novo Mago (Admin)
+            </h3>
+            <form onsubmit="saveNewUser(event)" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-semibold text-zinc-400 uppercase mb-1">Nick / Usuário</label>
+                    <input type="text" id="newPlayerNick" required class="w-full bg-black border border-zinc-800 rounded-xl px-4 py-2.5 text-white text-sm focus:outline-none focus:border-red-600">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-zinc-400 uppercase mb-1">Senha Provisória</label>
+                    <input type="password" id="newPlayerPass" required class="w-full bg-black border border-zinc-800 rounded-xl px-4 py-2.5 text-white text-sm focus:outline-none focus:border-red-600" placeholder="••••••••">
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-semibold text-zinc-400 uppercase mb-1">Reino</label>
+                        <select id="newPlayerKingdom" class="w-full bg-black border border-zinc-800 rounded-xl px-3 py-2.5 text-white text-xs">
+                            <option value="Reino Clover">Reino Clover 🕌</option>
+                            <option value="Reino Diamond">Reino Diamond 🕍</option>
+                            <option value="Reino Spade">Reino Spade 🏰</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-zinc-400 uppercase mb-1">Classe Social</label>
+                        <select id="newPlayerClass" class="w-full bg-black border border-zinc-800 rounded-xl px-3 py-2.5 text-white text-xs">
+                            <option value="Plebeu">Plebeu 👨🏻‍🌾</option>
+                            <option value="Nobre">Nobre 🤵🏻</option>
+                            <option value="Realeza">Realeza 🤴🏻</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-semibold text-zinc-400 uppercase mb-1">Patente</label>
+                        <select id="newPlayerRank" class="w-full bg-black border border-zinc-800 rounded-xl px-3 py-2.5 text-white text-xs">
+                            <option value="Júnior">Júnior ☪️</option>
+                            <option value="Intermediário">Intermediário ⚜️</option>
+                            <option value="Sênior">Sênior 🔱</option>
+                            <option value="Grão Mago">Grão Mago ⚛️</option>
+                            <option value="Capitão">Capitão ⚖️</option>
+                            <option value="Rei Mago">Rei Mago 👑</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-zinc-400 uppercase mb-1">É Administrador?</label>
+                        <select id="newPlayerIsAdmin" class="w-full bg-black border border-zinc-800 rounded-xl px-3 py-2.5 text-white text-xs">
+                            <option value="false">Não</option>
+                            <option value="true">Sim</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="flex gap-3 pt-2">
+                    <button type="button" onclick="closeAddUserModal()" class="flex-1 bg-zinc-900 hover:bg-zinc-800 text-zinc-400 py-3 rounded-xl text-xs font-semibold border border-zinc-800">Cancelar</button>
+                    <button type="submit" class="flex-1 bg-red-600 hover:bg-red-700 text-white py-3 rounded-xl text-xs font-bold">Cadastrar Mago</button>
+                </div>
+            </form>
+        </div>
+    </div>
 
     <!-- CARD MODAL -->
     <div id="cardModal" class="hidden fixed inset-0 z-50 bg-black/85 backdrop-blur-sm flex items-center justify-center p-4">
@@ -447,7 +513,7 @@
         </div>
     </div>
 
-    <!-- SCRIPTS NA ORDEM CORRETA -->
+    <!-- SCRIPTS -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="supabase.js"></script>
     <script src="rpg.js"></script>
