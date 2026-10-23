@@ -48,6 +48,8 @@ async function handleLogin(e) {
         if (menuNick) menuNick.textContent = currentUser.nick;
         if (welcomeNick) welcomeNick.textContent = currentUser.nick;
         
+        checkAdminStatus();
+
         if (currentUser.first_access === true) {
             showView('viewNewPassword');
         } else {
