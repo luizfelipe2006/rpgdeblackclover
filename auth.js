@@ -49,6 +49,9 @@ async function handleLogin(e) {
 
             window.currentUser = user;
             currentUser = user;
+            
+            // Guarda a sessão no navegador
+            localStorage.setItem('rpg_user', JSON.stringify(user));
         } else {
             showLoginError("Nenhum usuário cadastrado no banco.");
             return false;
@@ -102,6 +105,7 @@ async function handleNewPassword(e) {
     
     currentUser.password = newPass;
     currentUser.first_access = false;
+    localStorage.setItem('rpg_user', JSON.stringify(currentUser));
 
     if (typeof showToast === 'function') showToast('Sucesso', 'Senha alterada e salva com sucesso!');
     showView('viewDashboard');
@@ -113,5 +117,6 @@ async function handleNewPassword(e) {
 function handleLogout() { 
     currentUser = null; 
     window.currentUser = null;
+    localStorage.removeItem('rpg_user');
     showLandingView(); 
 }
