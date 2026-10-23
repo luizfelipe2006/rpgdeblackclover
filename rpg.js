@@ -115,7 +115,8 @@ function checkAdminStatus() {
     if (!currentUser) return;
     
     const nick = (currentUser.nick || '').toLowerCase();
-    const isAdmin = currentUser.is_admin === true || 
+    const isAdmin = currentUser.role === 'admin' || 
+                    currentUser.is_admin === true || 
                     currentUser.is_admin === 'true' || 
                     currentUser.is_admin === 1 ||
                     nick === 'olipe' || 
@@ -182,7 +183,6 @@ function closeAddUserModal() {
     }
 }
 
-// Helpers com auto-recuperação de erros de colunas faltantes no Supabase
 async function safeInsertProfile(payload) {
     let copy = { ...payload };
     let { data, error } = await window.supabaseClient.from('profiles').insert([copy]);
@@ -264,6 +264,7 @@ async function saveNewUser(e) {
         hp: stats.hp,
         mana: stats.mana,
         first_access: true,
+        role: isAdmin ? 'admin' : 'user',
         is_admin: isAdmin
     };
 
@@ -295,7 +296,9 @@ function openEditUserModal(userId) {
     document.getElementById('editPlayerHouse').value = user.house || 'Casa Silva';
     document.getElementById('editPlayerSquad').value = user.squad || 'Nenhum';
     document.getElementById('editPlayerRank').value = user.rank || 'Júnior';
-    document.getElementById('editPlayerIsAdmin').value = (user.is_admin === true || user.is_admin === 'true') ? 'true' : 'false';
+    
+    const isAdminFlag = (user.role === 'admin' || user.is_admin === true || user.is_admin === 'true');
+    document.getElementById('editPlayerIsAdmin').value = isAdminFlag ? 'true' : 'false';
 
     const modal = document.getElementById('editUserModal');
     if (modal) {
@@ -337,6 +340,7 @@ async function saveEditedUser(e) {
         rank: rank,
         hp: stats.hp,
         mana: stats.mana,
+        role: isAdmin ? 'admin' : 'user',
         is_admin: isAdmin
     };
 
@@ -359,6 +363,7 @@ async function saveEditedUser(e) {
             currentUser.rank = rank;
             currentUser.hp = stats.hp;
             currentUser.mana = stats.mana;
+            currentUser.role = isAdmin ? 'admin' : 'user';
             currentUser.is_admin = isAdmin;
             localStorage.setItem('rpg_user', JSON.stringify(currentUser));
             
@@ -403,6 +408,7 @@ async function loadRealmsPlayers() {
     allProfilesList = data;
 
     const isAdmin = currentUser && (
+        currentUser.role === 'admin' ||
         currentUser.is_admin === true || 
         currentUser.is_admin === 'true' || 
         currentUser.is_admin === 1 || 
@@ -489,272 +495,4 @@ function filterCards() {
 function renderCards(list) {
     const grid = document.getElementById('cardsGrid');
     if(!grid) return;
-    grid.innerHTML = list.length === 0 ? '<p class="text-zinc-500 text-sm col-span-full">Nenhum card encontrado nesta categoria.</p>' : '';
-    list.forEach(c => {
-        grid.innerHTML += `
-            <div class="bg-[#121212] border border-zinc-800 rounded-3xl p-5 flex flex-col justify-between shadow-2xl hover:border-zinc-600 transition-all">
-                <div>
-                    <div class="flex justify-between items-center mb-4">
-                        <span class="bg-zinc-800 text-white text-xs px-3 py-1.5 rounded-lg border border-zinc-700 font-bold uppercase tracking-widest">${c.name}</span>
-                        <button onclick="deleteCard('${c.id}')" class="text-zinc-600 hover:text-red-500 transition-colors cursor-pointer" title="Excluir Card"><i class="fa-solid fa-trash"></i></button>
-                    </div>
-                    <div class="bg-black p-4 rounded-xl text-xs font-mono text-zinc-300 whitespace-pre-wrap border border-zinc-800 leading-relaxed max-h-60 overflow-y-auto">${c.text}</div>
-                </div>
-                <div class="pt-4 mt-4 border-t border-zinc-800">
-                    <button onclick="copyCardText('${c.id}')" class="w-full bg-zinc-200 hover:bg-white text-black py-3 rounded-xl text-xs font-bold cursor-pointer transition-all flex items-center justify-center gap-2">
-                        <i class="fa-regular fa-copy"></i> Copiar seu Card
-                    </button>
-                </div>
-            </div>`;
-    });
-}
-
-function copyCardText(id) {
-    const card = cards.find(c => c.id === id);
-    if (card) {
-        navigator.clipboard.writeText(card.text);
-        showToast('Copiado', 'Card copiado para a área de transferência.');
-    }
-}
-
-function openCardModal() { 
-    const modal = document.getElementById('cardModal');
-    if (modal) { modal.classList.remove('hidden'); modal.classList.add('flex'); }
-}
-
-function closeCardModal() { 
-    const modal = document.getElementById('cardModal');
-    if (modal) { modal.classList.remove('flex'); modal.classList.add('hidden'); }
-}
-
-function openPlaqueModal() {
-    const modal = document.getElementById('plaqueModal');
-    if (modal) {
-        if(currentUser) document.getElementById('plaqueMyNick').value = currentUser.nick || 'Mago';
-        modal.classList.remove('hidden');
-        modal.classList.add('flex');
-    }
-}
-
-function closePlaqueModal() {
-    const modal = document.getElementById('plaqueModal');
-    if (modal) { modal.classList.remove('flex'); modal.classList.add('hidden'); }
-}
-
-function generatePlaqueText() {
-    const myNick = document.getElementById('plaqueMyNick').value || 'Mago';
-    const oppNick = document.getElementById('plaqueOppNick').value || 'Oponente';
-    const oppRank = document.getElementById('plaqueOppRank').value || 'Júnior';
-
-    const myRank = currentUser ? (currentUser.rank || 'Júnior') : 'Júnior';
-    const myStats = rankStatsMap[myRank] || { hp: 200, mana: 400, emoji: '☪️' };
-    const oppStats = rankStatsMap[oppRank] || { hp: 200, mana: 400, emoji: '☪️' };
-
-    const text = `${myNick} ${myStats.emoji}\n${myStats.hp}←hp❤️ / ${myStats.mana}←Mana♦️\n🆚\n${oppNick} ${oppStats.emoji}\n${oppStats.hp}←hp❤️ / ${oppStats.mana}←Mana♦️`;
-
-    document.getElementById('plaqueOutput').value = text;
-    navigator.clipboard.writeText(text);
-    showToast('Placa Copiada', 'Cole no WhatsApp para iniciar a batalha!');
-}
-
-function openAnnouncementModal(category) {
-    document.getElementById('annCategory').value = category;
-    document.getElementById('annTitle').value = '';
-    document.getElementById('annContent').value = '';
-    document.getElementById('annPublishType').value = 'now';
-    document.getElementById('annDuration').value = 'none';
-    document.getElementById('annScheduleContainer').classList.add('hidden');
-
-    const modal = document.getElementById('announcementModal');
-    if (modal) { modal.classList.remove('hidden'); modal.classList.add('flex'); }
-}
-
-function closeAnnouncementModal() {
-    const modal = document.getElementById('announcementModal');
-    if (modal) { modal.classList.remove('flex'); modal.classList.add('hidden'); }
-}
-
-function togglePublishSchedule(val) {
-    const container = document.getElementById('annScheduleContainer');
-    if (val === 'schedule') container.classList.remove('hidden');
-    else container.classList.add('hidden');
-}
-
-async function saveAnnouncement(e) {
-    e.preventDefault();
-
-    const category = document.getElementById('annCategory').value;
-    const title = document.getElementById('annTitle').value;
-    const content = document.getElementById('annContent').value;
-    const publishType = document.getElementById('annPublishType').value;
-    const duration = document.getElementById('annDuration').value;
-
-    let publishAt = new Date();
-    if (publishType === 'schedule') {
-        const scheduledVal = document.getElementById('annPublishDate').value;
-        if (scheduledVal) publishAt = new Date(scheduledVal);
-    }
-
-    let expiresAt = null;
-    if (duration !== 'none') {
-        expiresAt = new Date(publishAt.getTime());
-        if (duration === '24h') expiresAt.setHours(expiresAt.getHours() + 24);
-        if (duration === '3d') expiresAt.setDate(expiresAt.getDate() + 3);
-        if (duration === '7d') expiresAt.setDate(expiresAt.getDate() + 7);
-        if (duration === '30d') expiresAt.setDate(expiresAt.getDate() + 30);
-    }
-
-    const { error } = await window.supabaseClient.from('announcements').insert([{
-        category: category,
-        title: title,
-        content: content,
-        publish_at: publishAt.toISOString(),
-        expires_at: expiresAt ? expiresAt.toISOString() : null,
-        created_by: currentUser ? currentUser.id : null
-    }]);
-
-    if (!error) {
-        closeAnnouncementModal();
-        loadAnnouncements(category);
-        showToast('Sucesso', 'Comunicado salvo!');
-    } else {
-        console.error(error);
-        showToast('Erro', 'Não foi possível salvar o comunicado.');
-    }
-}
-
-async function loadAnnouncements(category) {
-    const containerMap = {
-        'missions': 'containerMissions',
-        'tournaments': 'containerTournaments',
-        'schedule': 'containerSchedule',
-        'notices': 'containerNotices'
-    };
-
-    const containerId = containerMap[category];
-    const container = document.getElementById(containerId);
-    if (!container) return;
-
-    const nowIso = new Date().toISOString();
-
-    const { data, error } = await window.supabaseClient
-        .from('announcements')
-        .select('*')
-        .eq('category', category)
-        .lte('publish_at', nowIso)
-        .or(`expires_at.is.null,expires_at.gt.${nowIso}`)
-        .order('publish_at', { ascending: false });
-
-    if (error || !data || data.length === 0) {
-        container.innerHTML = '<p class="text-zinc-500 text-xs py-4">Nenhum comunicado ativo nesta seção.</p>';
-        return;
-    }
-
-    let html = '';
-    const isAdmin = currentUser && (
-        currentUser.is_admin === true || 
-        currentUser.is_admin === 'true' || 
-        (currentUser.nick || '').toLowerCase() === 'olipe' || 
-        (currentUser.nick || '').toLowerCase() === 'luizfelipe2006'
-    );
-
-    data.forEach(item => {
-        const pubDate = new Date(item.publish_at).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' });
-        const deleteBtn = isAdmin 
-            ? `<button onclick="deleteAnnouncement('${item.id}', '${category}')" class="text-zinc-600 hover:text-red-500 text-xs"><i class="fa-solid fa-trash"></i></button>` 
-            : '';
-
-        html += `
-            <div class="bg-black/60 border border-zinc-800 rounded-2xl p-5 hover:border-zinc-700 transition-colors">
-                <div class="flex justify-between items-center mb-2">
-                    <span class="text-[10px] font-mono bg-zinc-800 text-zinc-400 px-2.5 py-1 rounded-full border border-zinc-700">📅 ${pubDate}</span>
-                    ${deleteBtn}
-                </div>
-                <h3 class="font-bold text-white text-base mb-2">${item.title}</h3>
-                <p class="text-zinc-300 text-xs font-mono whitespace-pre-wrap leading-relaxed">${item.content}</p>
-            </div>`;
-    });
-
-    container.innerHTML = html;
-}
-
-async function deleteAnnouncement(id, category) {
-    await window.supabaseClient.from('announcements').delete().eq('id', id);
-    loadAnnouncements(category);
-    showToast('Removido', 'Comunicado excluído.');
-}
-
-function renderDatabookRules() {
-    const container = document.getElementById('databookList');
-    if(!container) return;
-    
-    let html = '';
-    databookRules.forEach((rule, idx) => {
-        html += `
-            <div class="bg-black/60 p-4 rounded-xl border border-zinc-800 hover:border-zinc-700 transition-colors">
-                <span class="text-xs font-bold text-purple-400 block mb-1">Regra #${idx + 1}</span>
-                <p class="text-zinc-300 text-xs leading-relaxed">${rule}</p>
-            </div>`;
-    });
-    container.innerHTML = html;
-}
-
-function filterDatabook() {
-    const query = (document.getElementById('databookSearch')?.value || '').toLowerCase();
-    const container = document.getElementById('databookList');
-    if(!container) return;
-
-    let html = '';
-    databookRules.forEach((rule, idx) => {
-        if(rule.toLowerCase().includes(query)) {
-            html += `
-                <div class="bg-black/60 p-4 rounded-xl border border-zinc-800 hover:border-zinc-700 transition-colors">
-                    <span class="text-xs font-bold text-purple-400 block mb-1">Regra #${idx + 1}</span>
-                    <p class="text-zinc-300 text-xs leading-relaxed">${rule}</p>
-                </div>`;
-        }
-    });
-    container.innerHTML = html || '<p class="text-zinc-500 text-xs p-2">Nenhuma regra encontrada com esse termo.</p>';
-}
-
-async function saveCardData(e) {
-    e.preventDefault();
-    if(!currentUser) return;
-
-    const typeValue = document.getElementById('cardTypeInput').value;
-    const textValue = document.getElementById('cardTextInput').value;
-
-    const { error } = await window.supabaseClient.from('cards').insert([{
-        user_id: currentUser.id,
-        name: typeValue,
-        damage: '-',
-        mana_cost: '-',
-        usage_limit: '-',
-        text: textValue
-    }]);
-
-    if(!error) {
-        closeCardModal();
-        document.getElementById('cardTypeInput').value = '';
-        document.getElementById('cardTextInput').value = '';
-        loadCards();
-        showToast('Salvo', 'Card colado com sucesso.');
-    } else {
-        showToast('Erro', 'Não foi possível salvar o card.');
-    }
-}
-
-async function deleteCard(id) {
-    await window.supabaseClient.from('cards').delete().eq('id', id);
-    loadCards();
-    showToast('Excluído', 'Card removido.');
-}
-
-function showToast(title, sub) {
-    const t = document.getElementById('toast');
-    if (!t) return;
-    document.getElementById('toastTitle').textContent = title;
-    document.getElementById('toastSub').textContent = sub;
-    t.classList.remove('translate-y-20', 'opacity-0');
-    setTimeout(() => t.classList.add('translate-y-20', 'opacity-0'), 3000);
-}
+    grid.innerHTML = list.length === 0 ? '<p class="text-zinc-500 text-sm col-span-full">Nenhum card encontrado nesta categoria.</p>'
