@@ -62,7 +62,6 @@ const emojiMap = {
     }
 };
 
-// AUTO-LOGIN AO CARREGAR A PÁGINA
 window.addEventListener('DOMContentLoaded', () => {
     const savedUser = localStorage.getItem('rpg_user');
     if (savedUser) {
@@ -213,38 +212,39 @@ async function saveNewUser(e) {
 
     const stats = rankStatsMap[rank] || { hp: 200, mana: 400 };
 
-    try {
-        const { error } = await window.supabaseClient
-            .from('profiles')
-            .insert([{
-                nick: nick,
-                password: password,
-                kingdom: kingdom,
-                social_class: socialClass,
-                house: house,
-                squad: squad,
-                rank: rank,
-                hp: stats.hp,
-                mana: stats.mana,
-                first_access: true,
-                is_admin: isAdmin
-            }]);
+    let payload = {
+        nick: nick,
+        password: password,
+        kingdom: kingdom,
+        social_class: socialClass,
+        house: house,
+        squad: squad,
+        rank: rank,
+        hp: stats.hp,
+        mana: stats.mana,
+        first_access: true,
+        is_admin: isAdmin
+    };
 
-        if (error) {
-            console.error("Erro no Supabase ao inserir:", error);
-            showToast('Erro ao cadastrar', error.message || 'Erro ao comunicar com o banco.');
-        } else {
-            closeAddUserModal();
-            nickInput.value = '';
-            passInput.value = '';
-            showToast('Sucesso', `Mago ${nick} cadastrado com sucesso!`);
-            if (typeof loadRealmsPlayers === 'function') {
-                loadRealmsPlayers();
-            }
+    let { error } = await window.supabaseClient.from('profiles').insert([payload]);
+
+    if (error && error.message && error.message.includes('is_admin')) {
+        delete payload.is_admin;
+        const retry = await window.supabaseClient.from('profiles').insert([payload]);
+        error = retry.error;
+    }
+
+    if (error) {
+        console.error("Erro no Supabase ao inserir:", error);
+        showToast('Erro ao cadastrar', error.message || 'Erro ao comunicar com o banco.');
+    } else {
+        closeAddUserModal();
+        nickInput.value = '';
+        passInput.value = '';
+        showToast('Sucesso', `Mago ${nick} cadastrado com sucesso!`);
+        if (typeof loadRealmsPlayers === 'function') {
+            loadRealmsPlayers();
         }
-    } catch (err) {
-        console.error("Erro interno no cadastro:", err);
-        showToast('Erro Interno', err.message || 'Falha ao processar o formulário.');
     }
 }
 
@@ -292,54 +292,54 @@ async function saveEditedUser(e) {
 
     const stats = rankStatsMap[rank] || { hp: 200, mana: 400 };
 
-    try {
-        const { error } = await window.supabaseClient
-            .from('profiles')
-            .update({
-                nick: nick,
-                password: password,
-                kingdom: kingdom,
-                social_class: socialClass,
-                house: house,
-                squad: squad,
-                rank: rank,
-                hp: stats.hp,
-                mana: stats.mana,
-                is_admin: isAdmin
-            })
-            .eq('id', id);
+    let payload = {
+        nick: nick,
+        password: password,
+        kingdom: kingdom,
+        social_class: socialClass,
+        house: house,
+        squad: squad,
+        rank: rank,
+        hp: stats.hp,
+        mana: stats.mana,
+        is_admin: isAdmin
+    };
 
-        if (error) {
-            console.error("Erro ao editar perfil:", error);
-            showToast('Erro', error.message || 'Não foi possível atualizar o mago.');
-        } else {
-            closeEditUserModal();
-            showToast('Sucesso', `Mago ${nick} atualizado com sucesso!`);
+    let { error } = await window.supabaseClient.from('profiles').update(payload).eq('id', id);
+
+    if (error && error.message && error.message.includes('is_admin')) {
+        delete payload.is_admin;
+        const retry = await window.supabaseClient.from('profiles').update(payload).eq('id', id);
+        error = retry.error;
+    }
+
+    if (error) {
+        console.error("Erro ao editar perfil:", error);
+        showToast('Erro', error.message || 'Não foi possível atualizar o mago.');
+    } else {
+        closeEditUserModal();
+        showToast('Sucesso', `Mago ${nick} atualizado com sucesso!`);
+        
+        if (currentUser && currentUser.id === id) {
+            currentUser.nick = nick;
+            currentUser.password = password;
+            currentUser.kingdom = kingdom;
+            currentUser.social_class = socialClass;
+            currentUser.house = house;
+            currentUser.squad = squad;
+            currentUser.rank = rank;
+            currentUser.hp = stats.hp;
+            currentUser.mana = stats.mana;
+            currentUser.is_admin = isAdmin;
+            localStorage.setItem('rpg_user', JSON.stringify(currentUser));
             
-            if (currentUser && currentUser.id === id) {
-                currentUser.nick = nick;
-                currentUser.password = password;
-                currentUser.kingdom = kingdom;
-                currentUser.social_class = socialClass;
-                currentUser.house = house;
-                currentUser.squad = squad;
-                currentUser.rank = rank;
-                currentUser.hp = stats.hp;
-                currentUser.mana = stats.mana;
-                currentUser.is_admin = isAdmin;
-                localStorage.setItem('rpg_user', JSON.stringify(currentUser));
-                
-                const menuNick = document.getElementById('menuUserNick');
-                const welcomeNick = document.getElementById('welcomeUserNick');
-                if (menuNick) menuNick.textContent = nick;
-                if (welcomeNick) welcomeNick.textContent = nick;
-            }
-
-            loadRealmsPlayers();
+            const menuNick = document.getElementById('menuUserNick');
+            const welcomeNick = document.getElementById('welcomeUserNick');
+            if (menuNick) menuNick.textContent = nick;
+            if (welcomeNick) welcomeNick.textContent = nick;
         }
-    } catch (err) {
-        console.error("Erro interno ao editar:", err);
-        showToast('Erro', 'Falha ao salvar as alterações.');
+
+        loadRealmsPlayers();
     }
 }
 
